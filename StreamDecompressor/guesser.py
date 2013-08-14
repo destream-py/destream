@@ -18,6 +18,7 @@ __mime2obj__ = [
 
 def open(filename=None, fileobj=None):
     res_obj = ArchiveFile(filename, fileobj)
+    res_obj.seek(0)
     for i in range(10):
         mime = determine_mime(res_obj)
         for re_mime, re_ext, module, obj in __mime2obj__:
