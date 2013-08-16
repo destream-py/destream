@@ -13,6 +13,7 @@ def determine_mime(f):
 __mime2obj__ = [
     (re.compile("^application/x-gzip$"), re.compile("\.gz$"), 'gzip', 'Gunzip'),
     (re.compile("^application/x-lzma$"), re.compile("\.lzma$"), 'lzma', 'Unlzma'),
+    (re.compile("^application/x-7z-compressed$"), re.compile("\.7z$"), 'p7zip', 'Un7z'),
     (re.compile("^application/x-tar$"), re.compile("\.tar$"), 'tar', 'Untar'),
 ]
 
