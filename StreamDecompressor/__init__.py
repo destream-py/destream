@@ -1,10 +1,10 @@
 import os
 import errno
-from io import BufferedReader, BytesIO, FileIO
+from io import IOBase, BufferedReader, BytesIO, FileIO
 from subprocess import Popen, PIPE
 
 
-class Archive(object):
+class Archive(IOBase):
     def __init__(self, filename, compressions):
         self.realname = filename
         self.compressions = compressions
