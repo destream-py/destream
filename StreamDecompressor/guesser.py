@@ -4,21 +4,19 @@ import magic
 from . import ArchiveFile
 
 
-def determine_mime(f):
-    pos = f.tell()
-    mime = magic.from_buffer(f.read(1024), mime=True)
-    f.seek(pos)
-    return mime
+def determine_mime(archive):
+    return magic.from_buffer(archive.peek(1024), mime=True)
 
 __mime2obj__ = [
     (re.compile("^application/x-gzip$"), re.compile("\.gz$"), 'gzip', 'Gunzip'),
     (re.compile("^application/x-lzma$"), re.compile("\.lzma$"), 'lzma', 'Unlzma'),
     (re.compile("^application/x-7z-compressed$"), re.compile("\.7z$"), 'p7zip', 'Un7z'),
     (re.compile("^application/x-tar$"), re.compile("\.tar$"), 'tar', 'Untar'),
+    (re.compile("^application/zip$"), re.compile("\.zip$"), 'zip', 'Unzip'),
 ]
 
-def open(filename=None, fileobj=None):
-    res_obj = ArchiveFile(filename, fileobj)
+def open(name=None, fileobj=None):
+    res_obj = ArchiveFile(fileobj, name)
     res_obj.seek(0)
     for i in range(10):
         mime = determine_mime(res_obj)
@@ -28,7 +26,7 @@ def open(filename=None, fileobj=None):
                re_ext.search(res_obj.realname):
                 res_obj = getattr(
                     __import__(module, globals(), locals(), [obj], -1),
-                    obj)(res_obj, re_ext.sub('', res_obj.realname))
+                    obj)(re_ext.sub('', res_obj.realname), res_obj)
                 break
         else:
             return res_obj

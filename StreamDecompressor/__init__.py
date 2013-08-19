@@ -4,34 +4,54 @@ from io import IOBase, BufferedReader, BytesIO, FileIO
 from subprocess import Popen, PIPE
 
 
-class Archive(IOBase):
-    def __init__(self, filename, compressions):
-        self.realname = filename
-        self.compressions = compressions
-
-
-class ArchiveFile(BufferedReader, Archive):
-    def __init__(self, filename=None, fileobj=None):
-        assert filename or fileobj, \
-            "One of these arguments must be specified: filename, fileobj"
-        Archive.__init__(self, (filename if filename else fileobj.name), [])
+class Archive(BufferedReader):
+    def __init__(self, name, compressions, fileobj=None,
+            source=None, single=True):
+        assert type(self) != Archive, \
+            "This class can not be used in standalone"
         if not fileobj:
-            BufferedReader.__init__(self, FileIO(filename))
+            fileobj = BytesIO()
         elif isinstance(fileobj, file):
-            fileio = FileIO(fileobj.fileno(), closefd=False)
-            fileio.name = fileobj.name
-            BufferedReader.__init__(self, fileio)
-        else:
-            BufferedReader.__init__(self, fileobj)
+            fileobj = FileIO(fileobj.fileno(), closefd=False)
+        assert isinstance(fileobj, IOBase), \
+            "fileobj must be an instance of io.IOBase or a file, got %s" \
+            % type(fileobj)
+        if not fileobj.seekable():
+            fileobj, stream = BytesIO(), fileobj
+            fileobj.writelines(stream)
+            fileobj.seek(0)
+        BufferedReader.__init__(self, fileobj)
+        self.realname = name
+        self.single = single
+        self.source = source
+        self.compressions = (source.compressions if isinstance(source, Archive)
+            else []) + compressions
 
 
-class ExternalPipe(BytesIO):
-    def __init__(self, command, fileobj, filename):
-        p = Popen(command, stdout=PIPE, stdin=PIPE)
-        p.stdin.writelines(fileobj)
+class ArchiveFile(Archive):
+    def __init__(self, fileobj=None, name=None):
+        if not fileobj:
+            if not name:
+                raise TypeError("Either name, fileobjmust be specified")
+            fileobj = FileIO(name)
+        elif not name:
+                name = fileobj.name
+        Archive.__init__(self, name, [], fileobj, single=True)
+
+
+class ExternalPipe(Archive):
+    def __init__(self, name, stdin):
+        assert type(self) != ExternalPipe, \
+            "This class can not be used in standalone"
+        assert hasattr(self, '__command__'), \
+            "__command__ attribute is missing in class %s" % type(self)
+        assert hasattr(self, '__compressions__'), \
+            "__compressions__ attribute is missing in class %s" % type(self)
+        p = Popen(self.__command__, stdout=PIPE, stdin=PIPE)
+        p.stdin.writelines(stdin)
         p.stdin.close()
-        BytesIO.__init__(self, p.stdout.read())
-        self.name = filename
+        Archive.__init__(self, name, self.__compressions__, p.stdout,
+            source=stdin, single=True)
 
 
 from guesser import *
