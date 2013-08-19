@@ -12,7 +12,9 @@ class Archive(BufferedReader):
         if not fileobj:
             fileobj = BytesIO()
         elif isinstance(fileobj, file):
+            filename = fileobj.name
             fileobj = FileIO(fileobj.fileno(), closefd=False)
+            fileobj.name = filename
         assert isinstance(fileobj, IOBase), \
             "fileobj must be an instance of io.IOBase or a file, got %s" \
             % type(fileobj)
@@ -32,11 +34,11 @@ class ArchiveFile(Archive):
     def __init__(self, fileobj=None, name=None):
         if not fileobj:
             if not name:
-                raise TypeError("Either name, fileobjmust be specified")
+                raise TypeError("Either name, fileobj must be specified")
             fileobj = FileIO(name)
         elif not name:
-                name = fileobj.name
-        Archive.__init__(self, name, [], fileobj, single=True)
+            name = fileobj.name
+        Archive.__init__(self, name, [], fileobj, source=fileobj, single=True)
 
 
 class ExternalPipe(Archive):
