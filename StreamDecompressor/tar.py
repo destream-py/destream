@@ -1,17 +1,16 @@
 import tarfile
-from io import BytesIO
+import io
 
 from . import Archive
 
 
-class Untar(BytesIO, Archive):
-    def __init__(self, archive, filename):
-        self.tarfile = tarfile.TarFile(fileobj=archive)
+class Untar(Archive):
+    def __init__(self, name, fileobj):
+        self.tarfile = tarfile.TarFile(fileobj=fileobj)
         members = self.tarfile.getmembers()
         single = (len(members) == 1)
-        Archive.__init__(self, filename,
-            archive.compressions + ['tar'], single=single)
+        stream = None
         if single:
-            BytesIO.__init__(self, self.tarfile.extractfile(members[0]).read())
-        else:
-            BytesIO.__init__(self)
+            stream = io.BytesIO(self.tarfile.extractfile(members[0]).read())
+        Archive.__init__(self, name, ['tar'], stream,
+            source=fileobj, single=single)
