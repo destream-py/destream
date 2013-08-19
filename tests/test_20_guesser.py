@@ -20,9 +20,6 @@ class GuesserTest(unittest2.TestCase):
         b = fileobj.read()
         self.assertEqual(a, b,
             "should have the same content")
-        for i in (1, 2):
-            fileobj.seek(i)
-            self.assertEqual(fileobj.tell(), guessed.tell())
         self.assertEqual(guessed.realname, fileobj.name)
 
     def test_20_external_pipe_lzma(self):

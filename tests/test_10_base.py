@@ -46,9 +46,14 @@ class ArchiveFileTest(unittest2.TestCase):
             os.unlink(filename)
 
 
+class CatsEye(ExternalPipe):
+    __command__ = ['cat']
+    __compressions__ = ['cat']
+
+
 class ExternalPipeTest(unittest2.TestCase):
     def regular_tests(self, pipe, filename, text):
-        self.assertEqual(pipe.name, filename,
+        self.assertEqual(pipe.realname, filename,
             "name attribute does not match!")
         pipe.seek(0)
         self.assertEqual(pipe.read(), text,
@@ -58,12 +63,9 @@ class ExternalPipeTest(unittest2.TestCase):
         text = "Hello World\n"
         filename = '<pipe_test>'
         fileobj = BytesIO(text)
-        pipe = ExternalPipe(
-            ['cat'],
-            fileobj,
-            filename,
-        )
+        pipe = CatsEye(filename, fileobj)
         pipe.read()
         self.assertEqual(pipe.read(), '',
             "should be the end of file")
+        self.assertEqual(CatsEye.__compressions__, pipe.compressions)
         self.regular_tests(pipe, filename, text)
