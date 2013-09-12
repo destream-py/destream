@@ -3,7 +3,7 @@ import binascii
 import re
 from subprocess import Popen, PIPE
 
-from . import Archive, ArchiveTemp
+from . import ArchivePack, ArchiveTemp
 
 __all__ = ['Un7z']
 
@@ -54,21 +54,22 @@ class Member(InfoBase):
             struct.unpack('BBBB', binascii.unhexlify('B53C0674')), 0)
 
 
-class Un7z(Archive):
+class Un7z(ArchivePack):
     def __init__(self, name, fileobj):
         fileobj = ArchiveTemp(fileobj)
         p = Popen([cmd_path, 'l', fileobj.name, '-slt'], stdout=PIPE)
         info = p.stdout.read()
         self.header = Header(ereg_header.search(info).group(1))
-        self.members = [Member(m.group(1)) \
+        self._members = [Member(m.group(1)) \
                         for m in ereg_member.finditer(info,
                             re.search('^'+'-'*10+'$', info, re.M).end(0))]
-        single = (len(self.members) == 1)
-        if single:
+        if len(self._members) == 1:
             self.p = Popen([cmd_path, 'e', fileobj.name, '-so'],
                 stdout=PIPE, stderr=PIPE)
             stream = self.p.stdout
         else:
             stream = None
-        Archive.__init__(self, name, ['7z'],
-            stream, source=fileobj, single=single)
+        ArchivePack.__init__(self, name, ['7z'], stream, source=fileobj)
+
+    def members(self):
+        return self._members

@@ -7,8 +7,7 @@ import threading
 
 
 class Archive(io.BufferedReader):
-    def __init__(self, name, compressions, fileobj=None,
-            source=None, single=True):
+    def __init__(self, name, compressions, fileobj=None, source=None):
         assert type(self) != Archive, \
             "This class can not be used in standalone"
         if not fileobj:
@@ -22,10 +21,33 @@ class Archive(io.BufferedReader):
             % type(fileobj)
         io.BufferedReader.__init__(self, fileobj)
         self.realname = name
-        self.single = single
         self.source = source
         self.compressions = (source.compressions if isinstance(source, Archive)
             else []) + compressions
+
+
+class ArchivePack(Archive):
+    def __init__(self, name, compressions, fileobj=None, source=None):
+        Archive.__init__(self, name, compressions, fileobj, source=source)
+
+    def single(self):
+        return len(self.members()) == 1
+
+    def members(self):
+        raise NotImplemented("class %s does not implement this method" \
+            % type(self))
+
+    def open(self, member):
+        raise NotImplemented("class %s does not implement this method" \
+            % type(self))
+
+    def extract(self, member, path):
+        raise NotImplemented("class %s does not implement this method" \
+            % type(self))
+
+    def extractall(self, path, members=None):
+        raise NotImplemented("class %s does not implement this method" \
+            % type(self))
 
 
 class ArchiveFile(Archive):
@@ -36,17 +58,15 @@ class ArchiveFile(Archive):
             fileobj = io.FileIO(name)
         elif not name:
             name = fileobj.name
-        Archive.__init__(self, name, [], fileobj, source=fileobj, single=True)
+        Archive.__init__(self, name, [], fileobj, source=fileobj)
 
 
 class ArchiveTemp(Archive):
     def __init__(self, fileobj, name=None):
         if isinstance(fileobj, Archive):
             if name is None: name = fileobj.realname
-            single = fileobj.single
         else:
             name = fileobj.name
-            single = True
         tempdir = os.path.dirname(name)
         try:
             self.tempfile = NamedTemporaryFile(dir=tempdir)
@@ -56,8 +76,23 @@ class ArchiveTemp(Archive):
         self.tempfile.seek(0)
         fileio = io.FileIO(self.tempfile.fileno(), closefd=False)
         fileio.name = self.tempfile.name
-        Archive.__init__(self, name, [], fileio,
-            source=fileobj, single=single)
+        Archive.__init__(self, name, [], fileio, source=fileobj)
+
+
+def make_seekable(fileobj):
+    if isinstance(fileobj, file):
+        filename = fileobj.name
+        fileobj = io.FileIO(fileobj.fileno(), closefd=False)
+        fileobj.name = filename
+    assert isinstance(fileobj, io.IOBase), \
+        "fileobj must be an instance of io.IOBase or a file, got %s" \
+        % type(fileobj)
+    if fileobj.seekable() and fileobj.tell() != 0:
+        import pdb
+        pdb.set_trace()
+        pass
+    return fileobj if fileobj.seekable() \
+        else ArchiveTemp(fileobj)
 
 
 class ExternalPipe(Archive, threading.Thread):
@@ -72,8 +107,8 @@ class ExternalPipe(Archive, threading.Thread):
         self.stdin = stdin
         threading.Thread.__init__(self)
         self.start()
-        Archive.__init__(self, name, self.__compressions__, self.p.stdout,
-            source=stdin, single=True)
+        Archive.__init__(self, name, self.__compressions__,
+            fileobj=self.p.stdout, source=stdin)
 
     def run(self):
         self.p.stdin.writelines(self.stdin)

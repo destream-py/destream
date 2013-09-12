@@ -1,28 +1,68 @@
 import tarfile as tarlib
 import io
 
-from . import Archive, ArchiveTemp
+from . import ArchivePack, make_seekable
 
 
-class Member(tarlib.ExFileObject, io.BufferedIOBase):
+class FileMember(io.IOBase, tarlib.ExFileObject):
+    closed = None
+
     def __init__(self, tarfile, tarinfo):
-        self.wrapped = tarlib.ExFileObject(tarfile, tarinfo)
-        io.BufferedIOBase.__init__(self)
+        fileobj = tarfile.fileobj
+        if isinstance(fileobj, file):
+            fileobj = io.FileIO(tarfile.fileobj.fileno(), closefd=False)
+        assert isinstance(fileobj, io.IOBase), \
+            "fileobj must be an instance of io.IOBase or a file, got %s" \
+            % type(fileobj)
+        tarlib.ExFileObject.__init__(self, tarfile, tarinfo)
+        self._readable = fileobj.readable()
+        self._seekable = fileobj.seekable()
 
     def readable(self):
-        return True
+        return self._readable
+
+    def seekable(self):
+        return self._seekable
+
+    def tell(self):
+        return tarlib.ExFileObject.tell(self)
+
+    def seek(self, offset, whence=io.SEEK_SET):
+        tarlib.ExFileObject.seek(self, offset, whence)
+        return self.tell()
 
     def read(self, n=-1):
-        return self.wrapped.read(n if n > -1 else None)
+        return tarlib.ExFileObject.read(self, (n if n > -1 else None))
 
-class Untar(Archive):
+    def readinto(self, b):
+        if len(b) == 0: return None
+        buf = self.read(len(b))
+        b[:len(buf)] = buf
+        return len(buf)
+
+
+class Untar(ArchivePack):
     def __init__(self, name, fileobj):
-        fileobj = ArchiveTemp(fileobj)
+        fileobj = make_seekable(fileobj)
         self.tarfile = tarlib.TarFile.open(fileobj=fileobj)
-        single = True
-        stream = Member(self.tarfile, self.tarfile.next())
-        if self.tarfile.next():
-            single = False
+        stream = FileMember(self.tarfile, self.tarfile.next())
+        self._single = (self.tarfile.next() is None)
+        if not self._single:
             stream = None
-        Archive.__init__(self, name, ['tar'], stream,
-            source=fileobj, single=single)
+        ArchivePack.__init__(self, name, ['tar'], source=fileobj,
+            fileobj=(self.single() and stream))
+
+    def single(self):
+        return self._single
+
+    def members(self):
+        return self.tarfile.getmembers()
+
+    def open(self, member):
+        return FileMember(self.tarfile, member)
+        
+    def extract(self, member, path):
+        return self.tarfile.extract(member, path)
+
+    def extractall(self, path, members=None):
+        return self.tarfile.extractall(path, members)
