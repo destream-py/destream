@@ -1,4 +1,6 @@
 *.py[cod]
+.*
+/StreamDecompressor/__main__.py
 
 # C extensions
 *.so
