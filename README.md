@@ -3,21 +3,25 @@ StreamDecompressor
 
 A simple module to decompress streams compressed multiple times
 
-Example
-=======
+Synopsis
+========
 
 ```python
 import StreamDecompressor
 
 import tarfile
 archive = StreamDecompressor.open("some_file.tar.gz")
-assert hasattr(archive, 'tarfile') \
+assert isinstance(archive, StreamDecompressor.ArchivePack) \
     and isinstance(archive.tarfile, tarfile.TarFile)
 
 archive = StreamDecompressor.open("weird_file.lzma.gz")
+assert isinstance(archive, StreamDecompressor.Archive)
 print archive.read()
 
-archive = StreamDecompressor.open("some_file.tar.gz.lzma")
+archive = StreamDecompressor.open("some_file.tar.xz")
 # If the tar file contains only one member, this is possible
-print archive.read()
+if archive.single():
+    print archive.read()
+else:
+    archive.extractall('/tmp/some/path/')
 ```
