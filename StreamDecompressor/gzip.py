@@ -1,9 +1,8 @@
-gzip = __import__('gzip')
+from . import ExternalPipe
 
-from . import Archive
+__all__ = ['Gunzip']
 
 
-class Gunzip(Archive):
-    def __init__(self, name, fileobj):
-        Archive.__init__(self, name, ['gzip'], gzip.GzipFile(fileobj=fileobj),
-            source=fileobj, single=True)
+class Gunzip(ExternalPipe):
+    __command__ = 'gunzip -c'.split()
+    __compressions__ = ['gzip']

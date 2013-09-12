@@ -3,7 +3,7 @@ from io import BytesIO
 import unittest2
 import warnings
 
-from StreamDecompressor import ArchiveFile, ExternalPipe
+from StreamDecompressor import ArchiveFile, ArchiveTemp, ExternalPipe
 
 warnings.filterwarnings(
     'ignore',
@@ -55,17 +55,28 @@ class ExternalPipeTest(unittest2.TestCase):
     def regular_tests(self, pipe, filename, text):
         self.assertEqual(pipe.realname, filename,
             "name attribute does not match!")
-        pipe.seek(0)
-        self.assertEqual(pipe.read(), text,
-            "file content does not match!")
+        self.assertEqual(pipe.read(), text, "file content does not match!")
+        self.assertEqual(pipe.read(), '', "should be the end of file")
 
     def test_10_check_output(self):
         text = "Hello World\n"
         filename = '<pipe_test>'
         fileobj = BytesIO(text)
         pipe = CatsEye(filename, fileobj)
-        pipe.read()
-        self.assertEqual(pipe.read(), '',
-            "should be the end of file")
         self.assertEqual(CatsEye.__compressions__, pipe.compressions)
         self.regular_tests(pipe, filename, text)
+
+
+class ArchiveTempTest(unittest2.TestCase):
+    def test_10_create_temp_archive_from_externalpipe(self):
+        text = "Hello World\n"
+        filename = os.tmpnam()
+        fileobj = BytesIO(text)
+        pipe = CatsEye(filename, fileobj)
+        temp = ArchiveTemp(pipe)
+        self.assertEqual(pipe.read(), '', "should be the end of file")
+        self.assertEqual(
+            os.path.dirname(filename),
+            os.path.dirname(temp.name),
+            "Temp file and temp archive should be in the same directory")
+        self.assertEqual(temp.read(), text)
