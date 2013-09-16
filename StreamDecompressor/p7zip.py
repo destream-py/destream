@@ -26,13 +26,13 @@ class InfoBase:
         for m in ereg_info.finditer(infostring):
             setattr(self, self._normalize_key(m.group(1)), m.group(2))
         if hasattr(self, '_expected'):
-            assert set(self._expected) - set(dir(self)), \
-                "Some information are missing in info: " + infostring
+            assert set(self._expected) - set(dir(self)) == set(), \
+                "Some information are missing in info:\n" + infostring
 
 
 class Header(InfoBase):
     _expected = "path type solid blocks headers_size "\
-                "method physical_size"
+                "method physical_size".split()
 
     def __init__(self, infostring):
         InfoBase.__init__(self, infostring)
@@ -42,8 +42,8 @@ class Header(InfoBase):
 
 
 class Member(InfoBase):
-    _expected = "path size modified attributes crc encrpyted "\
-                "method packed_size"
+    _expected = "path size modified attributes crc encrypted "\
+                "method packed_size".split()
 
     def __init__(self, infostring):
         InfoBase.__init__(self, infostring)
