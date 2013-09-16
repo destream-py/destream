@@ -1,7 +1,7 @@
 import os
 import errno
 import io
-from tempfile import NamedTemporaryFile
+import tempfile
 from subprocess import Popen, PIPE
 import threading
 
@@ -69,9 +69,9 @@ class ArchiveTemp(Archive):
             name = fileobj.name
         tempdir = os.path.dirname(name)
         try:
-            self.tempfile = NamedTemporaryFile(dir=tempdir)
+            self.tempfile = tempfile.NamedTemporaryFile(dir=tempdir)
         except OSError:
-            self.tempfile = NamedTemporaryFile()
+            self.tempfile = tempfile.NamedTemporaryFile()
         self.tempfile.writelines(fileobj)
         self.tempfile.seek(0)
         fileio = io.FileIO(self.tempfile.fileno(), closefd=False)
@@ -87,10 +87,6 @@ def make_seekable(fileobj):
     assert isinstance(fileobj, io.IOBase), \
         "fileobj must be an instance of io.IOBase or a file, got %s" \
         % type(fileobj)
-    if fileobj.seekable() and fileobj.tell() != 0:
-        import pdb
-        pdb.set_trace()
-        pass
     return fileobj if fileobj.seekable() \
         else ArchiveTemp(fileobj)
 

@@ -49,23 +49,24 @@ class Member(InfoBase):
         InfoBase.__init__(self, infostring)
         self.size = int(self.size)
         self.packed_size = int(self.packed_size or '0')
-        self.block = int(self.block)
+        self.block = int(self.block or '0')
         self.crc = reduce(lambda x, y: x * 256 + y, \
             struct.unpack('BBBB', binascii.unhexlify('B53C0674')), 0)
 
 
 class Un7z(ArchivePack):
     def __init__(self, name, fileobj):
-        fileobj = ArchiveTemp(fileobj)
-        p = Popen([cmd_path, 'l', fileobj.name, '-slt'], stdout=PIPE)
+        self.fileobj = ArchiveTemp(fileobj)
+        p = Popen([cmd_path, 'l', self.fileobj.name, '-slt'], stdout=PIPE)
         info = p.stdout.read()
         self.header = Header(ereg_header.search(info).group(1))
         self._members = [Member(m.group(1)) \
                         for m in ereg_member.finditer(info,
                             re.search('^'+'-'*10+'$', info, re.M).end(0))]
         if len(self._members) == 1:
-            self.p = Popen([cmd_path, 'e', fileobj.name, '-so'],
+            self.p = Popen([cmd_path, 'e', self.fileobj.name, '-so'],
                 stdout=PIPE, stderr=PIPE)
+            p.stderr.close()
             stream = self.p.stdout
         else:
             stream = None
@@ -73,3 +74,35 @@ class Un7z(ArchivePack):
 
     def members(self):
         return self._members
+
+    def open(self, member, stream=True):
+        p = Popen([cmd_path, 'e', self.fileobj.name, '-so',
+            (member.path if isinstance(member, Member) else member)],
+            stdout=PIPE, stderr=PIPE)
+        p.stderr.close()
+        if stream:
+            return p.stdout
+        else:
+            temp = ArchiveTemp(p.stdout)
+            ret = p.wait()
+            if ret != 0:
+                raise Exception("Process returned with value=%d" % ret)
+            return temp
+
+    def extract(self, member, path):
+        p = Popen([cmd_path, 'e', self.fileobj.name, '-y', '-o'+path,
+            (member.path if isinstance(member, Member) else member)],
+            stdout=PIPE)
+        p.stdout.close()
+        ret = p.wait()
+        if ret != 0:
+            raise Exception("Process returned with value=%d" % ret)
+
+    def extractall(self, path, members=[]):
+        p = Popen([cmd_path, 'x', self.fileobj.name, '-y', '-o'+path] + \
+            [(m.path if isinstance(m, Member) else m) for m in members],
+            stdout=PIPE)
+        p.stdout.close()
+        ret = p.wait()
+        if ret != 0:
+            raise Exception("Process returned with value=%d" % ret)
