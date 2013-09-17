@@ -20,7 +20,7 @@ class Archive(io.BufferedReader):
             "fileobj must be an instance of io.IOBase or a file, got %s" \
             % type(fileobj)
         io.BufferedReader.__init__(self, fileobj)
-        self.realname = name
+        self.realname = name or ''
         self.source = source
         self.compressions = (source.compressions if isinstance(source, Archive)
             else []) + compressions
@@ -56,7 +56,7 @@ class ArchiveFile(Archive):
             if not name:
                 raise TypeError("Either name, fileobj must be specified")
             fileobj = io.FileIO(name)
-        elif not name:
+        elif not name and hasattr(fileobj, 'name'):
             name = fileobj.name
         Archive.__init__(self, name, [], fileobj, source=fileobj)
 
