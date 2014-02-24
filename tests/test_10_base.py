@@ -14,7 +14,7 @@ warnings.filterwarnings(
 
 
 class ArchiveFileTest(unittest2.TestCase):
-    def regular_tests(self, archive, fileobj, filename, text):
+    def _regular_tests(self, archive, fileobj, filename, text):
         self.assertEqual(archive.fileno(), fileobj.fileno(),
             "file no does not match!")
         self.assertEqual(archive.name, filename,
@@ -29,7 +29,7 @@ class ArchiveFileTest(unittest2.TestCase):
         fileobj.write(text)
         fileobj.flush()
         archive = ArchiveFile(fileobj=fileobj)
-        self.regular_tests(archive, fileobj, fileobj.name, text)
+        self._regular_tests(archive, fileobj, fileobj.name, text)
         fileobj.close()
 
     def test_20_passing_filename(self):
@@ -40,7 +40,7 @@ class ArchiveFileTest(unittest2.TestCase):
             fileobj.write(text)
             fileobj.flush()
             archive = ArchiveFile(fileobj=fileobj)
-            self.regular_tests(archive, fileobj, filename, text)
+            self._regular_tests(archive, fileobj, filename, text)
         finally:
             fileobj.close()
             os.unlink(filename)
@@ -52,7 +52,7 @@ class CatsEye(ExternalPipe):
 
 
 class ExternalPipeTest(unittest2.TestCase):
-    def regular_tests(self, pipe, filename, text):
+    def _regular_tests(self, pipe, filename, text):
         self.assertEqual(pipe.realname, filename,
             "name attribute does not match!")
         self.assertEqual(pipe.read(), text, "file content does not match!")
@@ -64,7 +64,7 @@ class ExternalPipeTest(unittest2.TestCase):
         fileobj = BytesIO(text)
         pipe = CatsEye(filename, fileobj)
         self.assertEqual(CatsEye.__compressions__, pipe.compressions)
-        self.regular_tests(pipe, filename, text)
+        self._regular_tests(pipe, filename, text)
 
 
 class ArchiveTempTest(unittest2.TestCase):
