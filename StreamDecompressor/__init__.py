@@ -1,9 +1,15 @@
 import os
+import sys
 import errno
 import io
 import tempfile
 from subprocess import Popen, PIPE
 import threading
+
+if sys.version_info < (2, 7):
+    io_name_attr = '_name'
+else:
+    io_name_attr = 'name'
 
 
 class Archive(io.BufferedReader):
@@ -15,11 +21,13 @@ class Archive(io.BufferedReader):
         elif isinstance(fileobj, file):
             filename = fileobj.name
             fileobj = io.FileIO(fileobj.fileno(), closefd=False)
-            fileobj.name = filename
+            setattr(fileobj, io_name_attr, filename)
         assert isinstance(fileobj, io.IOBase), \
             "fileobj must be an instance of io.IOBase or a file, got %s" \
             % type(fileobj)
         io.BufferedReader.__init__(self, fileobj)
+        if sys.version_info < (2, 7):
+            self.name = name
         self.realname = name or ''
         self.source = source
         self.compressions = (source.compressions if isinstance(source, Archive)
@@ -75,7 +83,7 @@ class ArchiveTemp(Archive):
         self.tempfile.writelines(fileobj)
         self.tempfile.seek(0)
         fileio = io.FileIO(self.tempfile.fileno(), closefd=False)
-        fileio.name = self.tempfile.name
+        setattr(fileio, io_name_attr, self.tempfile.name)
         Archive.__init__(self, name, [], fileio, source=fileobj)
 
 
@@ -83,7 +91,7 @@ def make_seekable(fileobj):
     if isinstance(fileobj, file):
         filename = fileobj.name
         fileobj = io.FileIO(fileobj.fileno(), closefd=False)
-        fileobj.name = filename
+        setattr(fileobj, io_name_attr, filename)
     assert isinstance(fileobj, io.IOBase), \
         "fileobj must be an instance of io.IOBase or a file, got %s" \
         % type(fileobj)

@@ -1,5 +1,6 @@
 import tarfile as tarlib
 import io
+from os import SEEK_SET
 
 from . import ArchivePack, make_seekable
 
@@ -27,7 +28,7 @@ class FileMember(io.IOBase, tarlib.ExFileObject):
     def tell(self):
         return tarlib.ExFileObject.tell(self)
 
-    def seek(self, offset, whence=io.SEEK_SET):
+    def seek(self, offset, whence=SEEK_SET):
         tarlib.ExFileObject.seek(self, offset, whence)
         return self.tell()
 
@@ -60,7 +61,7 @@ class Untar(ArchivePack):
 
     def open(self, member):
         return FileMember(self.tarfile, member)
-        
+
     def extract(self, member, path):
         return self.tarfile.extract(member, path)
 
