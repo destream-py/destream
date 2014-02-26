@@ -2,6 +2,7 @@ import os
 import sys
 from io import BytesIO
 import tarfile
+import zipfile
 import unittest2
 
 import StreamDecompressor
@@ -157,4 +158,31 @@ class GuesserTest(unittest2.TestCase):
         raw.name = "test_file.7z"
         self._check_decompressor(
             StreamDecompressor.decompressors.Un7z,
+            raw, uncompressed)
+
+    def test_30_zip_single_file(self):
+        uncompressed = BytesIO("Hello World\n")
+        raw = BytesIO()
+        raw.name = "test_file.zip"
+        zip = zipfile.ZipFile(raw, 'w')
+        try:
+            zip.writestr("test_file", uncompressed.getvalue())
+        finally:
+            zip.close()
+        self._check_decompressor(
+            StreamDecompressor.decompressors.Unzip,
+            raw, uncompressed)
+
+    def test_40_zip_multiple_files(self):
+        uncompressed = BytesIO("Hello World\n")
+        raw = BytesIO()
+        raw.name = "test_file.zip"
+        zip = zipfile.ZipFile(raw, 'w')
+        try:
+            for filename in ('test_file1', 'test_file2'):
+                zip.writestr(filename, uncompressed.getvalue())
+        finally:
+            zip.close()
+        self._check_decompressor(
+            StreamDecompressor.decompressors.Unzip,
             raw, uncompressed)

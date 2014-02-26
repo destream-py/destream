@@ -55,8 +55,9 @@ class Archive(io.BufferedReader):
             "fileobj must be an instance of io.IOBase or a file, got %s" \
             % type(fileobj)
         io.BufferedReader.__init__(self, fileobj)
-        if sys.version_info < (2, 6, 5):
-            self.name = name
+        # TODO: not sure if it is the best things to do...
+        if sys.version_info < (2, 6, 5) and not hasattr(self, 'name'):
+            self.name = getattr(fileobj, 'name', name)
         self.realname = name or ''
         self.source = source
         if hasattr(self, '__compression__'):
