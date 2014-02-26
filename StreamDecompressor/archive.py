@@ -27,7 +27,7 @@ class MetaArchive(type):
     """
     def __init__(cls, name, bases, dict):
         if dict['__module__'] != __name__:
-            all_decompressors.append(cls)
+            all_decompressors.append((cls.__priority__, cls))
 
 # resolve conflict meta class when using io from Python-2.6
 if sys.version_info < (2, 7):
@@ -41,6 +41,7 @@ class Archive(io.BufferedReader):
     Base class to Archive file
     """
     __metaclass__ = MetaArchive
+    __priority__ = 0
 
     def __init__(self, name, fileobj=None, source=None):
         assert type(self) != Archive, \

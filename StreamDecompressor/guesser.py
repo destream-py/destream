@@ -16,7 +16,7 @@ class Guesser(object):
 
     def guess(self, archive):
         mime = magic.from_buffer(archive.peek(1024), mime=True)
-        for decompressor in self.decompressors:
+        for priority, decompressor in sorted(self.decompressors):
             try:
                 realname = decompressor.__guess__(
                     mime, archive.realname, archive)

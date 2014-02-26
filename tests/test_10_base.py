@@ -49,6 +49,7 @@ class ArchiveFileTest(unittest2.TestCase):
 
 class CatsEye(ExternalPipe):
     __command__ = ['cat']
+    __priority__ = 10
 
     @classmethod
     def __guess__(cls, mime, name, archive):
