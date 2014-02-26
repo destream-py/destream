@@ -1,11 +1,8 @@
 import os
 import sys
 from io import BytesIO
-import gzip
 import tarfile
 import unittest2
-
-import compatibility
 
 import StreamDecompressor
 
@@ -68,10 +65,10 @@ class GuesserTest(unittest2.TestCase):
 
     def test_20_external_pipe_gzip(self):
         uncompressed = BytesIO("Hello World\n")
-        raw = BytesIO()
+        raw = BytesIO(
+            '\x1f\x8b\x08\x00\x96\xfa\rS\x00\x03\xf3H\xcd\xc9\xc9W\x08\xcf'
+            '/\xcaI\xe1\x02\x00\xe3\xe5\x95\xb0\x0c\x00\x00\x00')
         raw.name = "test_file.gz"
-        with gzip.GzipFile(fileobj=raw, mode='wb') as compressed:
-            compressed.writelines(uncompressed)
         self._check_decompressor(
             StreamDecompressor.decompressors.Gunzip,
             raw, uncompressed)
@@ -80,10 +77,13 @@ class GuesserTest(unittest2.TestCase):
         uncompressed = BytesIO("Hello World\n")
         raw = BytesIO()
         raw.name = "test_file.tar"
-        with tarfile.open(fileobj=raw, mode='w') as tar:
+        tar = tarfile.open(fileobj=raw, mode='w')
+        try:
             tarinfo = tarfile.TarInfo('test_file')
             tarinfo.size = len(uncompressed.getvalue())
             tar.addfile(tarinfo, uncompressed)
+        finally:
+            tar.close()
         self._check_decompressor(
             StreamDecompressor.decompressors.Untar,
             raw, uncompressed)
@@ -92,12 +92,15 @@ class GuesserTest(unittest2.TestCase):
         uncompressed = BytesIO("Hello World\n")
         raw = BytesIO()
         raw.name = "test_file.tar"
-        with tarfile.open(fileobj=raw, mode='w') as tar:
+        tar = tarfile.open(fileobj=raw, mode='w')
+        try:
             for filename in ('test_file1', 'test_file2'):
                 tarinfo = tarfile.TarInfo(filename)
                 tarinfo.size = len(uncompressed.getvalue())
                 uncompressed.seek(0)
                 tar.addfile(tarinfo, uncompressed)
+        finally:
+            tar.close()
         self._check_decompressor(
             StreamDecompressor.decompressors.Untar,
             raw, uncompressed)
