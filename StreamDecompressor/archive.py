@@ -6,6 +6,7 @@ import io
 import tempfile
 from subprocess import Popen, PIPE
 import threading
+from distutils.spawn import find_executable
 
 if sys.version_info < (2, 7):
     io_name_attr = '_name'
@@ -63,7 +64,7 @@ class Archive(io.BufferedReader):
 
     @classmethod
     def __checkavailability__(self):
-        return True
+        pass
 
     @classmethod
     def __guess__(cls, mime, name, fileobj):
@@ -72,7 +73,9 @@ class Archive(io.BufferedReader):
             return match.group(1)
         if match.group(2) and match.group(3) in cls.__extensions__:
             return match.group(1)
-        return None
+        raise AttributeError(
+            (cls, mime, name, fileobj),
+            "can not decompress fileobj using cls")
 
 
 class ArchivePack(Archive):
@@ -158,7 +161,7 @@ class ExternalPipe(Archive, threading.Thread):
     Pipe a file-object to a command and make an archive of the output
     """
     def __init__(self, name, stdin):
-        assert type(self) != ExternalPipe, \
+        assert type(self) is not ExternalPipe, \
             "This class can not be used in standalone"
         assert hasattr(self, '__command__'), \
             "__command__ attribute is missing in class %s" % type(self)
@@ -171,9 +174,14 @@ class ExternalPipe(Archive, threading.Thread):
         Archive.__init__(self, name, self.__compressions__,
             fileobj=self.p.stdout, source=stdin)
 
-    # TODO
-    #@classmethod
-    #def __guess__(self, mime, name, fileobj):
+    @classmethod
+    def __checkavailability__(cls):
+        assert cls is not ExternalPipe, \
+            "This class can not be used in standalone"
+        assert hasattr(cls, '__command__'), \
+            "__command__ attribute is missing in class %s" % cls
+        if find_executable(cls.__command__[0]) is None:
+            raise OSError(2, cls.__command__[0], "cannot find executable")
 
     def run(self):
         self.p.stdin.writelines(self.stdin)

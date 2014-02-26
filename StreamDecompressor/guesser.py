@@ -17,12 +17,13 @@ class Guesser(object):
     def guess(self, archive):
         mime = magic.from_buffer(archive.peek(1024), mime=True)
         for decompressor in self.decompressors:
-            if not decompressor.__checkavailability__():
-                continue
-            realname = decompressor.__guess__(mime, archive.realname, archive)
-            if realname is None:
-                continue
-            return decompressor(realname, archive)
+            try:
+                realname = decompressor.__guess__(
+                    mime, archive.realname, archive)
+                decompressor.__checkavailability__()
+                return decompressor(realname, archive)
+            except AttributeError:
+                pass
         return None
 
     def open(self, name=None, fileobj=None):
