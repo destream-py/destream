@@ -13,6 +13,10 @@ import StreamDecompressor
 class GuesserTest(unittest2.TestCase):
     def _check_decompressor(self,
             decompressor, compressed_fileobj, decompressed_fileobj):
+        try:
+            decompressor.__checkavailability__()
+        except:
+            self.skipTest("decompressor not available")
         with StreamDecompressor.open(fileobj=compressed_fileobj) as archive:
             self.assertEqual(
                 archive.compressions,
