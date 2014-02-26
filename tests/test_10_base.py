@@ -53,7 +53,7 @@ class CatsEye(ExternalPipe):
     @classmethod
     def __guess__(cls, mime, name, archive):
         if isinstance(archive, CatsEye):
-            raise AttributeError
+            raise ValueError
         return name
 
 

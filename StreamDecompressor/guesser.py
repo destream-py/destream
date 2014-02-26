@@ -22,7 +22,7 @@ class Guesser(object):
                     mime, archive.realname, archive)
                 decompressor.__checkavailability__()
                 return decompressor(realname, archive)
-            except AttributeError:
+            except ValueError:
                 pass
         return None
 

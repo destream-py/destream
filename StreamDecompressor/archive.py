@@ -77,7 +77,7 @@ class Archive(io.BufferedReader):
             return match.group(1)
         if match.group(2) and match.group(3) in cls.__extensions__:
             return match.group(1)
-        raise AttributeError(
+        raise ValueError(
             (cls, mime, name, fileobj),
             "can not decompress fileobj using cls")
 
