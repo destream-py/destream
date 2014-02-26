@@ -64,7 +64,8 @@ class Un7z(ArchivePack):
 
     def __init__(self, name, fileobj):
         self.fileobj = ArchiveTemp(fileobj)
-        p = Popen(__command__ + ['l', self.fileobj.name, '-slt'], stdout=PIPE)
+        p = Popen(self.__command__ + ['l', self.fileobj.name, '-slt'],
+                  stdout=PIPE)
         info = p.stdout.read()
         self.header = Header(ereg_header.search(info).group(1))
         self._members = [Member(m.group(1)) \
@@ -72,8 +73,8 @@ class Un7z(ArchivePack):
                             re.search('^'+'-'*10+'$', info, re.M).end(0))]
         if len(self._members) == 1:
             self.p = Popen(self.__command__ + ['e', self.fileobj.name, '-so'],
-                stdout=PIPE, stderr=PIPE)
-            p.stderr.close()
+                           stdout=PIPE, stderr=PIPE)
+            self.p.stderr.close()
             stream = self.p.stdout
         else:
             stream = None
