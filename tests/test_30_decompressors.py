@@ -66,7 +66,7 @@ class GuesserTest(unittest2.TestCase):
             StreamDecompressor.decompressors.Unlzma,
             raw, uncompressed)
 
-    def test_30_external_pipe_gzip(self):
+    def test_20_external_pipe_gzip(self):
         uncompressed = BytesIO("Hello World\n")
         raw = BytesIO()
         raw.name = "test_file.gz"
@@ -76,7 +76,7 @@ class GuesserTest(unittest2.TestCase):
             StreamDecompressor.decompressors.Gunzip,
             raw, uncompressed)
 
-    def test_40_tar_single_file(self):
+    def test_30_tar_single_file(self):
         uncompressed = BytesIO("Hello World\n")
         raw = BytesIO()
         raw.name = "test_file.tar"
@@ -88,7 +88,7 @@ class GuesserTest(unittest2.TestCase):
             StreamDecompressor.decompressors.Untar,
             raw, uncompressed)
 
-    def test_50_tar_multiple_files(self):
+    def test_40_tar_multiple_files(self):
         uncompressed = BytesIO("Hello World\n")
         raw = BytesIO()
         raw.name = "test_file.tar"
@@ -102,7 +102,7 @@ class GuesserTest(unittest2.TestCase):
             StreamDecompressor.decompressors.Untar,
             raw, uncompressed)
 
-    def test_60_external_pipe_xz(self):
+    def test_20_external_pipe_xz(self):
         uncompressed = BytesIO("Hello World\n")
         raw = BytesIO(
             '\xfd7zXZ\x00\x00\x04\xe6\xd6\xb4F\x02\x00!\x01\x16\x00\x00\x00'
@@ -113,7 +113,7 @@ class GuesserTest(unittest2.TestCase):
             StreamDecompressor.decompressors.Unxz,
             raw, uncompressed)
 
-    def test_70_7z_single_file(self):
+    def test_30_7z_single_file(self):
         uncompressed = BytesIO("Hello World\n")
         raws = [
             # no file, only the content is packed, use 7zr -si to make it
@@ -139,7 +139,7 @@ class GuesserTest(unittest2.TestCase):
                 StreamDecompressor.decompressors.Un7z,
                 raw, uncompressed)
 
-    def test_80_7z_multiple_files(self):
+    def test_40_7z_multiple_files(self):
         uncompressed = BytesIO("Hello World\n")
         raw = BytesIO(
             "7z\xbc\xaf'\x1c\x00\x035xN\x15`\x00\x00\x00\x00\x00\x00\x00 "
