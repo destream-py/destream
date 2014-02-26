@@ -186,3 +186,14 @@ class GuesserTest(unittest2.TestCase):
         self._check_decompressor(
             StreamDecompressor.decompressors.Unzip,
             raw, uncompressed)
+
+    def test_20_external_pipe_bz2(self):
+        uncompressed = BytesIO("Hello World\n")
+        raw = BytesIO(
+            'BZh91AY&SY\xd8r\x01/\x00\x00\x01W\x80\x00\x10@\x00\x00@\x00'
+            '\x80\x06\x04\x90\x00 \x00"\x06\x86\xd4 \xc9\x88\xc7i\xe8(\x1f'
+            '\x8b\xb9"\x9c(Hl9\x00\x97\x80')
+        raw.name = "test_file.bz2"
+        self._check_decompressor(
+            StreamDecompressor.decompressors.Bunzip2,
+            raw, uncompressed)
