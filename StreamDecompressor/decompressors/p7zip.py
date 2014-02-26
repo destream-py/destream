@@ -3,7 +3,7 @@ import binascii
 import re
 from subprocess import Popen, PIPE
 
-from . import ArchivePack, ArchiveTemp
+from StreamDecompressor import ArchivePack, ArchiveTemp
 
 __all__ = ['Un7z']
 
@@ -55,6 +55,9 @@ class Member(InfoBase):
 
 
 class Un7z(ArchivePack):
+    __mimes__ = ['application/x-7z-compressed']
+    __extensions__ = ['7z']
+
     def __init__(self, name, fileobj):
         self.fileobj = ArchiveTemp(fileobj)
         p = Popen([cmd_path, 'l', self.fileobj.name, '-slt'], stdout=PIPE)

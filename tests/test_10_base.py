@@ -25,12 +25,11 @@ class ArchiveFileTest(unittest2.TestCase):
 
     def test_10_passing_file_object(self):
         text = "Hello World!\n"
-        fileobj = os.tmpfile()
-        fileobj.write(text)
-        fileobj.flush()
-        archive = ArchiveFile(fileobj=fileobj)
-        self._regular_tests(archive, fileobj, fileobj.name, text)
-        fileobj.close()
+        with os.tmpfile() as fileobj:
+            fileobj.write(text)
+            fileobj.flush()
+            archive = ArchiveFile(fileobj=fileobj)
+            self._regular_tests(archive, fileobj, fileobj.name, text)
 
     def test_20_passing_filename(self):
         text = "Hello World!\n"
@@ -49,6 +48,10 @@ class ArchiveFileTest(unittest2.TestCase):
 class CatsEye(ExternalPipe):
     __command__ = ['cat']
     __compressions__ = ['cat']
+
+    @classmethod
+    def __guess__(cls, mime, name, archive):
+        return (name if 'cat' not in archive.compressions else None)
 
 
 class ExternalPipeTest(unittest2.TestCase):

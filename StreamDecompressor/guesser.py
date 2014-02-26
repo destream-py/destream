@@ -1,36 +1,47 @@
-import re
 import magic
 
-from . import ArchiveFile, ArchivePack
+from archive import ArchiveFile, ArchivePack, \
+                    all_decompressors
+
+__all__ = ['Guesser', 'open']
 
 
-def determine_mime(archive):
-    return magic.from_buffer(archive.peek(1024), mime=True)
+class Guesser(object):
+    """
+    Make a stream using the decompressors given in the constructor
+    """
+    def __init__(self, decompressors, limit=10):
+        self.decompressors = list(decompressors)
+        self.limit = limit
 
-__mime2obj__ = [
-    (re.compile("^application/x-gzip$"), re.compile("\.gz$"), 'gzip', 'Gunzip'),
-    (re.compile("^application/x-xz$"), re.compile("\.xz$"), 'xz', 'Unxz'),
-    (re.compile("^application/x-lzma$"), re.compile("\.lzma$"), 'lzma', 'Unlzma'),
-    (re.compile("^application/x-7z-compressed$"), re.compile("\.7z$"), 'p7zip', 'Un7z'),
-    (re.compile("^application/x-tar$"), re.compile("\.tar$"), 'tar', 'Untar'),
-    (re.compile("^application/zip$"), re.compile("\.zip$"), 'zip', 'Unzip'),
-]
+    def guess(self, archive):
+        mime = magic.from_buffer(archive.peek(1024), mime=True)
+        for decompressor in self.decompressors:
+            if not decompressor.__checkavailability__():
+                continue
+            realname = decompressor.__guess__(mime, archive.realname, archive)
+            if realname is None:
+                continue
+            return decompressor(realname, archive)
+        return None
+
+    def open(self, name=None, fileobj=None):
+        archive = ArchiveFile(fileobj, name)
+        archive.seek(0) # TODO should be useless
+
+        for i in range(self.limit):
+            guessed = self.guess(archive)
+            if not guessed:
+                return archive
+            archive = guessed
+            if isinstance(archive, ArchivePack) and not archive.single:
+                return archive
+
+        raise Exception("More than 10 pipes or infinite loop detected")
+
 
 def open(name=None, fileobj=None):
-    res_obj = ArchiveFile(fileobj, name)
-    res_obj.seek(0)
-    for i in range(10):
-        if isinstance(res_obj, ArchivePack) and not res_obj.single:
-            break
-        mime = determine_mime(res_obj)
-        for re_mime, re_ext, module, obj in __mime2obj__:
-            module = "%s.%s" % (__package__, module)
-            if re_mime.search(mime) or \
-               re_ext.search(res_obj.realname):
-                res_obj = getattr(
-                    __import__(module, globals(), locals(), [obj], -1),
-                    obj)(re_ext.sub('', res_obj.realname), res_obj)
-                break
-        else:
-            return res_obj
-    raise Exception("More than 10 pipes or infinite loop detected")
+    """
+    Use all decompressor possible to make the stream
+    """
+    return Guesser(all_decompressors).open(name=name, fileobj=fileobj)

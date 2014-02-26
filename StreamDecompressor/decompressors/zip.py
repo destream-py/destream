@@ -1,10 +1,13 @@
 import zipfile
 import io
 
-from . import ArchivePack, make_seekable, ArchiveFile
+from StreamDecompressor import ArchivePack, make_seekable, ArchiveFile
 
 
 class Unzip(ArchivePack):
+    __mimes__ = ['application/zip']
+    __extensions__ = ['zip']
+
     def __init__(self, name, fileobj):
         # part of the Zip header is at the end of the file. Therefore, we have
         # to create a temporary file from the previous stream and write the

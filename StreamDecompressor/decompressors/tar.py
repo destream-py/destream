@@ -2,7 +2,7 @@ import tarfile as tarlib
 import io
 from os import SEEK_SET
 
-from . import ArchivePack, make_seekable
+from StreamDecompressor import ArchivePack, make_seekable
 
 
 class FileMember(io.IOBase, tarlib.ExFileObject):
@@ -43,6 +43,9 @@ class FileMember(io.IOBase, tarlib.ExFileObject):
 
 
 class Untar(ArchivePack):
+    __mimes__ = ['application/tar']
+    __extensions__ = ['tar']
+
     def __init__(self, name, fileobj):
         fileobj = make_seekable(fileobj)
         self.tarfile = tarlib.TarFile.open(fileobj=fileobj)

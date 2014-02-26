@@ -7,16 +7,20 @@ import unittest2
 
 import compatibility
 
-import StreamDecompressor
-from StreamDecompressor import determine_mime
+from StreamDecompressor import Guesser, all_decompressors, ExternalPipe
 
+
+# small hack to make it works with test_10_base.py
+guesser = Guesser(filter(
+    lambda d: not issubclass(d, ExternalPipe) or not d.__command__ == ['cat'],
+    all_decompressors ))
 
 class GuesserTest(unittest2.TestCase):
     def test_10_plain_text(self):
         text = "Hello World\n"
         fileobj = BytesIO(text)
         fileobj.name = "test_file.txt"
-        guessed = StreamDecompressor.open(fileobj=fileobj)
+        guessed = guesser.open(fileobj=fileobj)
         self.assertEqual(guessed.compressions, [],
             "should not have compressions")
         fileobj.seek(0)
@@ -39,7 +43,7 @@ class GuesserTest(unittest2.TestCase):
                       '$\x19I\x98o\x10\x11\xc8_\xe6\xd5\x8a\x04\xda\x01\xc7'
                       '\xff\xff\x0b8\x00\x00')
         raw.name = "test_file.lzma"
-        guessed = StreamDecompressor.open(fileobj=raw)
+        guessed = guesser.open(fileobj=raw)
         self.assertEqual(guessed.compressions, ['lzma'])
         self.assertEqual(guessed.read(), text,
             "content does not match")
@@ -51,7 +55,7 @@ class GuesserTest(unittest2.TestCase):
         raw.name = "test_file.gz"
         with gzip.GzipFile(fileobj=raw, mode='wb') as compressed:
             compressed.write(text)
-        guessed = StreamDecompressor.open(fileobj=raw)
+        guessed = guesser.open(fileobj=raw)
         self.assertEqual(guessed.compressions, ['gzip'])
         self.assertEqual(guessed.read(), text,
             "content does not match")
@@ -65,7 +69,7 @@ class GuesserTest(unittest2.TestCase):
             tarinfo = tarfile.TarInfo('test_file')
             tarinfo.size = len(text)
             tar.addfile(tarinfo, BytesIO(text))
-        with StreamDecompressor.open(fileobj=raw) as guessed:
+        with guesser.open(fileobj=raw) as guessed:
             self.assertEqual(guessed.compressions, ['tar'])
             self.assertEqual(guessed.read(), text,
                 "content does not match")
@@ -80,7 +84,7 @@ class GuesserTest(unittest2.TestCase):
                 tarinfo = tarfile.TarInfo(filename)
                 tarinfo.size = len(text)
                 tar.addfile(tarinfo, BytesIO(text))
-        with StreamDecompressor.open(fileobj=raw) as guessed:
+        with guesser.open(fileobj=raw) as guessed:
             self.assertEqual(guessed.compressions, ['tar'])
             self.assertEqual(guessed.read(), '',
                 "content should be empty for tarfiles with multiple files")
