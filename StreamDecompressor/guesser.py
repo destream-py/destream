@@ -35,7 +35,7 @@ class Guesser(object):
             if not guessed:
                 return archive
             archive = guessed
-            if isinstance(archive, ArchivePack) and not archive.single:
+            if isinstance(archive, ArchivePack) and not archive.single():
                 return archive
 
         raise Exception("More than 10 pipes or infinite loop detected")

@@ -15,7 +15,9 @@ warnings.filterwarnings(
 
 class ArchiveFileTest(unittest2.TestCase):
     def _regular_tests(self, archive, fileobj, filename, text):
-        self.assertEqual(archive.fileno(), fileobj.fileno(),
+        self.assertEqual(
+            archive.fileno(),
+            fileobj.fileno(),
             "file no does not match!")
         self.assertEqual(archive.name, filename,
             "name attribute does not match!")
@@ -47,11 +49,12 @@ class ArchiveFileTest(unittest2.TestCase):
 
 class CatsEye(ExternalPipe):
     __command__ = ['cat']
-    __compressions__ = ['cat']
 
     @classmethod
     def __guess__(cls, mime, name, archive):
-        return (name if 'cat' not in archive.compressions else None)
+        if isinstance(archive, CatsEye):
+            raise AttributeError
+        return name
 
 
 class ExternalPipeTest(unittest2.TestCase):
@@ -66,7 +69,7 @@ class ExternalPipeTest(unittest2.TestCase):
         filename = '<pipe_test>'
         fileobj = BytesIO(text)
         pipe = CatsEye(filename, fileobj)
-        self.assertEqual(CatsEye.__compressions__, pipe.compressions)
+        self.assertEqual(pipe.compressions, [])
         self._regular_tests(pipe, filename, text)
 
 

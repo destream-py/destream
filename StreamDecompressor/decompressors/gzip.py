@@ -7,4 +7,4 @@ class Gunzip(ExternalPipe):
     __mimes__ = ['application/x-gzip']
     __extensions__ = ['gz']
     __command__ = 'gunzip -c'.split()
-    __compressions__ = ['gzip']
+    __compression__ = 'gzip'

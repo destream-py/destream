@@ -42,7 +42,7 @@ class Archive(io.BufferedReader):
     """
     __metaclass__ = MetaArchive
 
-    def __init__(self, name, compressions, fileobj=None, source=None):
+    def __init__(self, name, fileobj=None, source=None):
         assert type(self) != Archive, \
             "This class can not be used in standalone"
         if not fileobj:
@@ -59,8 +59,12 @@ class Archive(io.BufferedReader):
             self.name = name
         self.realname = name or ''
         self.source = source
-        self.compressions = (source.compressions if isinstance(source, Archive)
-            else []) + compressions
+        if hasattr(self, '__compression__'):
+            self.compressions = source.compressions + [self.__compression__]
+        elif hasattr(source, 'compressions'):
+            self.compressions = source.compressions
+        else:
+            self.compressions = []
 
     @classmethod
     def __checkavailability__(self):
@@ -82,8 +86,8 @@ class ArchivePack(Archive):
     """
     Base class for an archive that is also a pack of file (tar, zip, ...)
     """
-    def __init__(self, name, compressions, fileobj=None, source=None):
-        Archive.__init__(self, name, compressions, fileobj, source=source)
+    def __init__(self, name, fileobj=None, source=None):
+        Archive.__init__(self, name, fileobj, source=source)
 
     def single(self):
         return len(self.members()) == 1
@@ -116,7 +120,7 @@ class ArchiveFile(Archive):
             fileobj = io.FileIO(name)
         elif not name and hasattr(fileobj, 'name'):
             name = fileobj.name
-        Archive.__init__(self, name, [], fileobj, source=fileobj)
+        Archive.__init__(self, name, fileobj, source=fileobj)
 
 
 class ArchiveTemp(Archive):
@@ -137,7 +141,7 @@ class ArchiveTemp(Archive):
         self.tempfile.seek(0)
         fileio = io.FileIO(self.tempfile.fileno(), closefd=False)
         setattr(fileio, io_name_attr, self.tempfile.name)
-        Archive.__init__(self, name, [], fileio, source=fileobj)
+        Archive.__init__(self, name, fileio, source=fileobj)
 
 
 def make_seekable(fileobj):
@@ -165,14 +169,11 @@ class ExternalPipe(Archive, threading.Thread):
             "This class can not be used in standalone"
         assert hasattr(self, '__command__'), \
             "__command__ attribute is missing in class %s" % type(self)
-        assert hasattr(self, '__compressions__'), \
-            "__compressions__ attribute is missing in class %s" % type(self)
         self.p = Popen(self.__command__, stdout=PIPE, stdin=PIPE)
         self.stdin = stdin
         threading.Thread.__init__(self)
         self.start()
-        Archive.__init__(self, name, self.__compressions__,
-            fileobj=self.p.stdout, source=stdin)
+        Archive.__init__(self, name, fileobj=self.p.stdout, source=stdin)
 
     @classmethod
     def __checkavailability__(cls):

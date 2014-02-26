@@ -7,6 +7,7 @@ from StreamDecompressor import ArchivePack, make_seekable, ArchiveFile
 class Unzip(ArchivePack):
     __mimes__ = ['application/zip']
     __extensions__ = ['zip']
+    __compression__ = 'zip'
 
     def __init__(self, name, fileobj):
         # part of the Zip header is at the end of the file. Therefore, we have
@@ -14,7 +15,7 @@ class Unzip(ArchivePack):
         # whole content
         fileobj = make_seekable(fileobj)
         self.zipfile = zipfile.ZipFile(fileobj)
-        ArchivePack.__init__(self, name, ['zip'], source=fileobj,
+        ArchivePack.__init__(self, name, source=fileobj,
             fileobj=(self.single() and self.open(self.members()[0])))
 
     def members(self):
