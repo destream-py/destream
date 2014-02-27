@@ -10,8 +10,9 @@ class Guesser(object):
     """
     Make a stream using the decompressors given in the constructor
     """
-    def __init__(self, decompressors, limit=10):
-        self.decompressors = sorted(decompressors)
+    def __init__(self, decompressors=builtin_decompressors,
+                 extra_decompressors=[], limit=10):
+        self.decompressors = sorted(decompressors + extra_decompressors)
         self.limit = limit
 
     def guess(self, archive):
@@ -46,4 +47,4 @@ def open(name=None, fileobj=None):
     """
     Use all decompressor possible to make the stream
     """
-    return Guesser(builtin_decompressors).open(name=name, fileobj=fileobj)
+    return Guesser().open(name=name, fileobj=fileobj)
