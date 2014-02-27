@@ -50,14 +50,15 @@ class Untar(ArchivePack):
     __compression__ = 'tar'
 
     def __init__(self, name, fileobj):
-        fileobj = make_seekable(fileobj)
-        self.tarfile = tarlib.TarFile.open(fileobj=fileobj)
+        source = make_seekable(fileobj)
+        self.tarfile = tarlib.TarFile.open(fileobj=source)
         stream = FileMember(self.tarfile, self.tarfile.next())
         self._single = (self.tarfile.next() is None)
         if not self._single:
-            stream = None
-        ArchivePack.__init__(self, name, source=fileobj,
-            fileobj=(self.single() and stream))
+            stream = source
+            stream.seek(0)
+        ArchivePack.__init__(self, name, source=source,
+            fileobj=stream)
 
     def single(self):
         return self._single

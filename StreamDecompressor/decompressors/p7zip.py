@@ -77,7 +77,8 @@ class Un7z(ArchivePack):
             self.p.stderr.close()
             stream = self.p.stdout
         else:
-            stream = None
+            stream = self.fileobj
+            stream.seek(0)
         ArchivePack.__init__(self, name, stream, source=fileobj)
 
     def members(self):

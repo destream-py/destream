@@ -17,6 +17,9 @@ class Guesser(object):
     def guess(self, archive):
         mime = magic.from_buffer(archive.peek(1024), mime=True)
         for _, decompressor in self.decompressors:
+            if isinstance(archive, ArchivePack) and \
+               type(archive) is decompressor:
+                continue
             try:
                 realname = decompressor.__guess__(
                     mime, archive.realname, archive)
@@ -35,8 +38,6 @@ class Guesser(object):
             if not guessed:
                 return archive
             archive = guessed
-            if isinstance(archive, ArchivePack) and not archive.single():
-                return archive
 
         raise Exception("More than 10 pipes or infinite loop detected")
 

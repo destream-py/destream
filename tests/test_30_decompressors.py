@@ -29,8 +29,13 @@ class GuesserTest(unittest2.TestCase):
                 self.assertEqual(archive.read(), decompressed_fileobj.read(),
                     "content does not match")
             else:
-                self.assertEqual(archive.read(), '',
-                    "content should be empty for archive having multiple files")
+                archive.seek(0)
+                archive_content = archive.read()
+                archive.source.seek(0)
+                source_content = archive.source.read()
+                self.assertEqual(archive.read(), archive.source.read(),
+                    "content should have the same content than source archive "
+                    "for archives having multiple files")
                 for fileobj in (archive.open(m) for m in archive.members()):
                     decompressed_fileobj.seek(0)
                     self.assertEqual(
