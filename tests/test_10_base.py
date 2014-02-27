@@ -53,8 +53,9 @@ class CatsEye(ExternalPipe):
 
     @classmethod
     def __guess__(cls, mime, name, archive):
-        if isinstance(archive, CatsEye):
-            raise ValueError
+        if cls in archive.__decompressors__:
+            raise ValueError("oh no, not again!")
+        print "don't skip"
         return name
 
 
@@ -71,6 +72,7 @@ class ExternalPipeTest(unittest2.TestCase):
         fileobj = BytesIO(text)
         pipe = CatsEye(filename, fileobj)
         self.assertEqual(pipe.compressions, [])
+        self.assertEqual(pipe.__decompressors__, [CatsEye])
         self._regular_tests(pipe, filename, text)
 
 
