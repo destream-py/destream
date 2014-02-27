@@ -61,12 +61,14 @@ class Archive(io.BufferedReader):
             self.name = getattr(fileobj, 'name', name)
         self.realname = name or ''
         self.source = source
-        if hasattr(self, '__compression__'):
-            self.compressions = source.compressions + [self.__compression__]
-        elif hasattr(source, 'compressions'):
-            self.compressions = source.compressions
+        if isinstance(source, Archive):
+            self.__decompressors__ = source.__decompressors__ + [type(self)]
+            self.compressions = list(source.compressions)
         else:
+            self.__decompressors__ = [type(self)]
             self.compressions = []
+        if hasattr(self, '__compression__'):
+            self.compressions += [self.__compression__]
 
     @classmethod
     def __checkavailability__(self):
