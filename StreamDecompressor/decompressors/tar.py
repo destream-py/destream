@@ -4,6 +4,8 @@ from os import SEEK_SET
 
 from StreamDecompressor import ArchivePack, make_seekable
 
+__all__ = ['Untar']
+
 
 class FileMember(io.IOBase, tarlib.ExFileObject):
     closed = None

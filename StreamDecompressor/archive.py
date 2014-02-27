@@ -15,24 +15,9 @@ else:
 
 __all__ = """\
         Archive ArchivePack ArchiveFile ArchiveTemp ExternalPipe
-        make_seekable all_decompressors
+        make_seekable
     """.split()
 
-
-all_decompressors = []
-
-class MetaArchive(type):
-    """
-    Register all possible decompressor automatically
-    """
-    def __init__(cls, name, bases, dict):
-        if dict['__module__'] != __name__:
-            all_decompressors.append((cls.__priority__, cls))
-
-# resolve conflict meta class when using io from Python-2.6
-if sys.version_info < (2, 7):
-    class MetaArchive(MetaArchive, io.BufferedReader.__metaclass__):
-        pass
 
 re_extension = re.compile('^(.*?)(\.([^.]+))?$')
 
@@ -40,9 +25,6 @@ class Archive(io.BufferedReader):
     """
     Base class to Archive file
     """
-    __metaclass__ = MetaArchive
-    __priority__ = 0
-
     def __init__(self, name, fileobj=None, source=None):
         assert type(self) != Archive, \
             "This class can not be used in standalone"

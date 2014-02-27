@@ -4,6 +4,9 @@ import sys
 
 from StreamDecompressor import ArchivePack, make_seekable, ArchiveFile
 
+__all__ = ['Unzip']
+
+
 if sys.version_info < (2, 7):
     # Make member file-like object inheriting from io.BufferedIOBase
     # (just like Python-2.7)

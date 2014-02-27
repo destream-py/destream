@@ -1,7 +1,7 @@
 import magic
 
-from archive import ArchiveFile, ArchivePack, \
-                    all_decompressors
+from archive import ArchiveFile, ArchivePack
+from decompressors import builtin_decompressors
 
 __all__ = ['Guesser', 'open']
 
@@ -11,12 +11,12 @@ class Guesser(object):
     Make a stream using the decompressors given in the constructor
     """
     def __init__(self, decompressors, limit=10):
-        self.decompressors = list(decompressors)
+        self.decompressors = sorted(decompressors)
         self.limit = limit
 
     def guess(self, archive):
         mime = magic.from_buffer(archive.peek(1024), mime=True)
-        for priority, decompressor in sorted(self.decompressors):
+        for _, decompressor in self.decompressors:
             try:
                 realname = decompressor.__guess__(
                     mime, archive.realname, archive)
@@ -45,4 +45,4 @@ def open(name=None, fileobj=None):
     """
     Use all decompressor possible to make the stream
     """
-    return Guesser(all_decompressors).open(name=name, fileobj=fileobj)
+    return Guesser(builtin_decompressors).open(name=name, fileobj=fileobj)
