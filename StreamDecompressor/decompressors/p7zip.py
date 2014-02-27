@@ -8,7 +8,7 @@ from StreamDecompressor import ArchivePack, ArchiveTemp, ExternalPipe
 __all__ = ['Un7z']
 
 
-ereg_header = re.compile('^'+'-'*2+r'\n(.+?)(?=\n\n)', re.M+re.S)
+ereg_header = re.compile('^'+r'--+\n(.+?)(?=\n\n)', re.M+re.S)
 ereg_member = re.compile('^'+r'(.+?)(?=\n\n)', re.M+re.S)
 ereg_info = re.compile(r'^[ \t\f]*(.+?)[ \t\f]*=[ \t\f]*(.*?)[ \t\f]*$', re.M)
 
