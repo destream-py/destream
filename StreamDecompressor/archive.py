@@ -167,8 +167,17 @@ class ExternalPipe(Archive, threading.Thread):
             "This class can not be used in standalone"
         assert hasattr(cls, '__command__'), \
             "__command__ attribute is missing in class %s" % cls
-        if find_executable(cls.__command__[0]) is None:
-            raise OSError(2, cls.__command__[0], "cannot find executable")
+        commands = [cls.__command__[0]]
+        if hasattr(cls, '__fallbackcommands__'):
+            commands += cls.__fallbackcommands__
+        existing_commands = filter(None, map(find_executable, commands))
+        if not existing_commands:
+            if len(commands) == 1:
+                raise OSError(2, commands[0], "cannot find executable")
+            else:
+                raise OSError(2, commands[0],
+                    "cannot find executable between: " + ", ".join(commands))
+        cls.__command__[0] = existing_commands[0]
 
     def run(self):
         self.p.stdin.writelines(self.stdin)
