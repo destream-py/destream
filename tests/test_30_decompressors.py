@@ -1,4 +1,6 @@
 import os
+import tempfile
+import shutil
 import sys
 from io import BytesIO
 import tarfile
@@ -29,6 +31,7 @@ class GuesserTest(unittest2.TestCase):
                 self.assertEqual(archive.read(), decompressed_fileobj.read(),
                     "content does not match")
             else:
+                # test source archive
                 archive.seek(0)
                 archive_content = archive.read()
                 archive.source.seek(0)
@@ -36,12 +39,50 @@ class GuesserTest(unittest2.TestCase):
                 self.assertEqual(archive.read(), archive.source.read(),
                     "content should have the same content than source archive "
                     "for archives having multiple files")
+                # test open()
                 for fileobj in (archive.open(m) for m in archive.members()):
                     decompressed_fileobj.seek(0)
                     self.assertEqual(
                         fileobj.read(),
                         decompressed_fileobj.read(),
                         "content does not match")
+                # test extract()
+                tempdir = tempfile.mkdtemp()
+                try:
+                    for member in archive.members():
+                        if hasattr(member, 'isfile') and not member.isfile():
+                            continue
+                        archive.extract(member, tempdir)
+                        filename = getattr(member, 'filename',
+                            getattr(member, 'name', None))
+                        if filename is None:
+                            raise AttributeError(
+                                "%s instance has no attribute 'filename' nor "
+                                "'name'" % (type(member).__name__))
+                        filepath = os.path.join(tempdir, filename)
+                        self.assertTrue(os.path.isfile(filepath),
+                            "can not extract using extract() method: "
+                            + filepath)
+                finally:
+                    shutil.rmtree(tempdir)
+                # test extractall()
+                tempdir = tempfile.mkdtemp()
+                try:
+                    archive.extractall(tempdir)
+                    for member in archive.members():
+                        filename = getattr(member, 'filename',
+                            getattr(member, 'name', None))
+                        if filename is None:
+                            raise AttributeError(
+                                "%s instance has no attribute 'filename' nor "
+                                "'name'" % (type(member).__name__))
+                        filepath = os.path.join(tempdir, filename)
+                        self.assertTrue(os.path.exists(filepath),
+                            "can not extract using extract() method: "
+                            + filepath)
+                finally:
+                    shutil.rmtree(tempdir)
+
             self.assertEqual(
                 archive.realname + '.' + decompressor.__extensions__[0],
                 compressed_fileobj.name,
@@ -100,7 +141,7 @@ class GuesserTest(unittest2.TestCase):
         raw.name = "test_file.tar"
         tar = tarfile.open(fileobj=raw, mode='w')
         try:
-            for filename in ('test_file1', 'test_file2'):
+            for filename in ('a/test_file1', 'b/test_file2'):
                 tarinfo = tarfile.TarInfo(filename)
                 tarinfo.size = len(uncompressed.getvalue())
                 uncompressed.seek(0)
@@ -151,15 +192,16 @@ class GuesserTest(unittest2.TestCase):
     def test_40_7z_multiple_files(self):
         uncompressed = BytesIO("Hello World\n")
         raw = BytesIO(
-            "7z\xbc\xaf'\x1c\x00\x035xN\x15`\x00\x00\x00\x00\x00\x00\x00 "
-            "\x00\x00\x00\x00\x00\x00\x00`\x98\xfa\xcf\x00$\x19I\x98o\x10\x11"
-            "\xc8_\xe6\xd5\x8a\x05U3\x9d`\x00\x00\x00\x813\x07\xae\x0f\xcf'"
-            "\xf0\x8c\x07\xc8C\x80\x83\x81[\xff\xac\x80\x1dP\x19\xff\xf6\xf8"
-            "\x17!l\xa9\xf9r\x19\x1b^y\xee#r\xd7\x12\xcdoh>\x03\xf3\xbf\xaf"
-            "\xe47\x9b\x99\xd3\x9d\x0b\x17\xf0\xa1\xd0\x1d\ta\x91\xc8w\xd1"
-            "\xee\x95\xa6\xe2\xbd\x8b\x81\x00\x00\x17\x06\x13\x01\tM\x00\x07"
-            "\x0b\x01\x00\x01#\x03\x01\x01\x05]\x00\x10\x00\x00\x0cZ\n\x01"
-            "\x15U\xfe\x8a\x00\x00")
+            '7z\xbc\xaf\'\x1c\x00\x03\x10\xads\x82x\x00\x00\x00\x00\x00\x00'
+            '\x00!\x00\x00\x00\x00\x00\x00\x00\x7f$\xaa\x86\x00$\x19I\x98o'
+            '\x10\x11\xc8_\xe6\xd5\x8a\x05U3\x9d`\x00\x00\x00\x813\x07\xae'
+            '\x0f\xcf\'\xf0\x8c\x07\xc8C\x80\x83\x81[\xff\xac\x80\x1dP\x19'
+            '\xff\xf6\xf8\x17!l\xa9\xf9r\x19\x1b^y\xee#r\xd7\x15\xd2\xfc\xe1'
+            '\x17\xfa\xaa"\xafV\x05\xd7>\x1c\xf5\x93\xb5!R\x11\xdcMP\xf6\xab'
+            '\xc7\xd5\xc9\xbdj*{\xffp\x81\xbd\xf9\xbd\xf3\x87W\xfe\xa3F\xa3~&('
+            '\xdc{\xd4\xb6Z\x9d\x98Dj \x00\x00\x17\x06\x13\x01\te\x00\x07\x0b'
+            '\x01\x00\x01#\x03\x01\x01\x05]\x00\x10\x00\x00\x0c\x80\x85\n\x01'
+            'pF\xbb5\x00\x00')
         raw.name = "test_file.7z"
         self._check_decompressor(
             StreamDecompressor.decompressors.Un7z,
@@ -184,7 +226,7 @@ class GuesserTest(unittest2.TestCase):
         raw.name = "test_file.zip"
         zip = zipfile.ZipFile(raw, 'w')
         try:
-            for filename in ('test_file1', 'test_file2'):
+            for filename in ('a/test_file1', 'b/test_file2'):
                 zip.writestr(filename, uncompressed.getvalue())
         finally:
             zip.close()
