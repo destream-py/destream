@@ -61,7 +61,8 @@ class Archive(io.BufferedReader):
         match = re_extension.search(name)
         if mime in cls.__mimes__:
             return match.group(1)
-        if match.group(2) and match.group(3) in cls.__extensions__:
+        if hasattr(cls, '__extensions__') and \
+           match.group(2) and match.group(3) in cls.__extensions__:
             return match.group(1)
         raise ValueError(
             (cls, mime, name, fileobj),
