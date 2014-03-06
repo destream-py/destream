@@ -160,6 +160,7 @@ class ExternalPipe(Archive, threading.Thread):
         self.stdin = stdin
         threading.Thread.__init__(self)
         self.start()
+        self._closed = False
         Archive.__init__(self, name, fileobj=self.p.stdout, source=stdin)
 
     @classmethod
@@ -181,5 +182,14 @@ class ExternalPipe(Archive, threading.Thread):
         cls.__command__[0] = existing_commands[0]
 
     def run(self):
-        self.p.stdin.writelines(self.stdin)
-        self.p.stdin.close()
+        try:
+            self.p.stdin.writelines(self.stdin)
+        except IOError:
+            pass
+        finally:
+            self.p.stdin.close()
+
+    def close(self):
+        if not self._closed:
+            self._closed = True
+            self.p.kill()
