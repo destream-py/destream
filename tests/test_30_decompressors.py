@@ -131,6 +131,7 @@ class GuesserTest(unittest2.TestCase):
             tar.addfile(tarinfo, uncompressed)
         finally:
             tar.close()
+        raw.seek(0)
         self._check_decompressor(
             StreamDecompressor.decompressors.Untar,
             raw, uncompressed)
@@ -148,6 +149,7 @@ class GuesserTest(unittest2.TestCase):
                 tar.addfile(tarinfo, uncompressed)
         finally:
             tar.close()
+        raw.seek(0)
         self._check_decompressor(
             StreamDecompressor.decompressors.Untar,
             raw, uncompressed)

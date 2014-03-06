@@ -52,7 +52,10 @@ class Untar(ArchivePack):
     def __init__(self, name, fileobj):
         source = make_seekable(fileobj)
         self.tarfile = tarlib.TarFile.open(fileobj=source)
-        stream = FileMember(self.tarfile, self.tarfile.next())
+        first_member = self.tarfile.next()
+        if first_member is None:
+            raise IOError("empty tar file")
+        stream = FileMember(self.tarfile, first_member)
         self._single = (self.tarfile.next() is None)
         if not self._single:
             stream = source
