@@ -32,7 +32,6 @@ class Guesser(object):
 
     def open(self, name=None, fileobj=None):
         archive = ArchiveFile(fileobj, name)
-        archive.seek(0) # TODO should be useless
 
         for i in range(self.limit):
             guessed = self.guess(archive)
