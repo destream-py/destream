@@ -3,7 +3,7 @@ from io import BytesIO
 import unittest2
 import warnings
 
-from StreamDecompressor import ArchiveFile, ArchiveTemp, ExternalPipe
+from StreamDecompressor import Archive, ArchiveFile, ArchiveTemp, ExternalPipe
 
 warnings.filterwarnings(
     'ignore',
@@ -11,6 +11,27 @@ warnings.filterwarnings(
     RuntimeWarning,
     '^%s$' % __name__,
 )
+
+
+class BaseNameTest(Archive):
+    __extensions__ = ['ext1', 'ext2']
+    __mimes__ = ['mime1', 'mime2']
+
+
+class Archive(unittest2.TestCase):
+    def test_10_guess_basename(self):
+        fileobj = BytesIO('')
+        try:
+            self.assertEqual(
+                'xxx', BaseNameTest.__guess__('mime1', 'xxx', fileobj))
+            self.assertEqual(
+                'xxx', BaseNameTest.__guess__('mime2', 'xxx', fileobj))
+            self.assertEqual(
+                'xxx', BaseNameTest.__guess__('xxx', 'xxx.ext1', fileobj))
+            self.assertEqual(
+                'xxx', BaseNameTest.__guess__('mime1', 'xxx.ext2', fileobj))
+        except ValueError, e:
+            self.fail(repr(e))
 
 
 class ArchiveFileTest(unittest2.TestCase):
