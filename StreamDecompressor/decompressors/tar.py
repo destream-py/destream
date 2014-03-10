@@ -61,13 +61,16 @@ class Untar(ArchivePack):
         self.tarfile = tarlib.TarFile.open(fileobj=source)
         first_member = self.tarfile.next()
         if first_member is None:
-            raise IOError("empty tar file")
-        stream = FileMember(self.tarfile, first_member)
+            raise IOError("can not read first member of the tar archive")
         self._single = (self.tarfile.next() is None)
-        if not self._single:
+        if self._single:
+            stream = FileMember(self.tarfile, first_member)
+            stream_name = first_member.name
+        else:
+            stream_name = name
             stream = source
             stream.seek(0)
-        ArchivePack.__init__(self, name, source=source, fileobj=stream)
+        ArchivePack.__init__(self, stream_name, source=source, fileobj=stream)
 
     def single(self):
         return self._single

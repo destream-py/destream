@@ -65,10 +65,12 @@ class Unrar(ArchivePack):
         self._members = [m for m in (Member(h) for h in hunks)]
         if len(self._members) == 1:
             stream = self.open(self._members[0], stream=True)
+            stream_name = self._members[0].filename
         else:
+            stream_name = name
             stream = self.fileobj
             stream.seek(0)
-        ArchivePack.__init__(self, name, stream, source=fileobj)
+        ArchivePack.__init__(self, stream_name, stream, source=fileobj)
 
     def members(self):
         return self._members
