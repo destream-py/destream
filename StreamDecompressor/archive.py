@@ -184,14 +184,21 @@ class ExternalPipe(Archive, threading.Thread):
         try:
             self.p.stdin.writelines(self.source)
         except IOError:
-            pass
-        finally:
+            self.close(kill=True)
+        else:
             self.p.stdin.close()
-        self.errors = self.p.stderr.read()
-        self.retcode = self.p.wait()
-        self._closed = True
+            self.close(kill=False)
 
-    def close(self):
+    @property
+    def closed(self):
+        return self.p.stdout.closed
+
+    def close(self, kill=True):
         if not self._closed:
+            if kill:
+                self.p.kill()
             self._closed = True
-            self.p.kill()
+            self.retcode = self.p.wait()
+            self.errors = self.p.stderr.read()
+            self.p.stdin.close()
+            self.p.stderr.close()
