@@ -61,16 +61,19 @@ class Archive(io.BufferedReader):
 
     @classmethod
     def __guess__(cls, mime, name, fileobj):
+        assert hasattr(cls, '__mimes__'), \
+            "this function is useless without __mimes__"
+        realname = name
         if isinstance(name, basestring):
             match = re_extension.search(name)
             if hasattr(cls, '__extensions__') and \
                match.group(2) and match.group(3) in cls.__extensions__:
-                return match.group(1)
-        if hasattr(cls, '__mimes__') and mime in cls.__mimes__:
-            return name
-        raise ValueError(
-            (cls, mime, name, fileobj),
-            "can not decompress fileobj using class %s" % cls.__name__)
+                realname = match.group(1)
+        if mime not in cls.__mimes__:
+            raise ValueError(
+                (cls, mime, name, fileobj),
+                "can not decompress fileobj using class %s" % cls.__name__)
+        return realname
 
 
 class ArchivePack(Archive):
