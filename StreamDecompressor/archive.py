@@ -34,6 +34,9 @@ class Archive(io.BufferedReader):
             filename = fileobj.name
             fileobj = io.FileIO(fileobj.fileno(), closefd=False)
             setattr(fileobj, io_name_attr, filename)
+        elif isinstance(fileobj, int):
+            fileobj = io.FileIO(fileobj, closefd=False)
+            setattr(fileobj, io_name_attr, name)
         assert isinstance(fileobj, io.IOBase), \
             "fileobj must be an instance of io.IOBase or a file, got %s" \
             % type(fileobj)
@@ -58,11 +61,12 @@ class Archive(io.BufferedReader):
 
     @classmethod
     def __guess__(cls, mime, name, fileobj):
-        match = re_extension.search(name)
-        if hasattr(cls, '__extensions__') and \
-           match.group(2) and match.group(3) in cls.__extensions__:
-            return match.group(1)
-        elif hasattr(cls, '__mimes__') and mime in cls.__mimes__:
+        if isinstance(name, basestring):
+            match = re_extension.search(name)
+            if hasattr(cls, '__extensions__') and \
+               match.group(2) and match.group(3) in cls.__extensions__:
+                return match.group(1)
+        if hasattr(cls, '__mimes__') and mime in cls.__mimes__:
             return name
         raise ValueError(
             (cls, mime, name, fileobj),
@@ -119,7 +123,8 @@ class ArchiveTemp(Archive):
             if name is None: name = fileobj.realname
         else:
             name = fileobj.name
-        tempdir = os.path.dirname(name)
+        tempdir = \
+            (os.path.dirname(name) if isinstance(name, basestring) else None)
         try:
             self.tempfile = tempfile.NamedTemporaryFile(dir=tempdir)
         except OSError:
