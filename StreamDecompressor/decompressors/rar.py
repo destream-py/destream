@@ -2,6 +2,7 @@ import struct
 import binascii
 import re
 from subprocess import Popen, PIPE, CalledProcessError
+from distutils.version import LooseVersion as Version
 
 from StreamDecompressor import ArchivePack, ArchiveTemp, ExternalPipe
 
@@ -60,7 +61,17 @@ class Unrar(ArchivePack):
         p = Popen(self.__command__ + ['vta', self.fileobj.name],
                   stdout=PIPE)
         hunks = iter(p.stdout.read().split("\n\n"))
-        hunks.next() # drop program information
+        self.information = hunks.next().strip()
+        matches = re.match("(\S+| (?! ))+", self.information)
+        assert matches, "can not parse rar information header"
+        self.version = tuple(
+            Version(matches.group(0).replace(' ', '.'))\
+            .version[1:])
+        # NOTE: I only know it works with version 5 but not with version 3
+        # it could works with version 4...
+        assert self.version >= (4,), \
+            "This version of %s (%s) is probably not compatible" \
+            % (self.__command__[0], self.version)
         self.header = Header(hunks.next())
         self._members = [m for m in (Member(h) for h in hunks)]
         if len(self._members) == 1:
