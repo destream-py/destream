@@ -17,7 +17,6 @@ class GuesserTest(unittest2.TestCase):
             decompressor.__checkavailability__()
         except:
             self.skipTest("decompressor not available")
-        decompressed_fileobj.seek(0)
         with StreamDecompressor.open(fileobj=compressed_fileobj) as archive:
             # check that the decompressor has been used
             self.assertIn(
@@ -147,6 +146,7 @@ class GuesserTest(unittest2.TestCase):
             tarinfo = tarfile.TarInfo('test_file')
             tarinfo.size = len(uncompressed.getvalue())
             tar.addfile(tarinfo, uncompressed)
+            uncompressed.seek(0)
         finally:
             tar.close()
         raw.seek(0)
@@ -184,7 +184,6 @@ class GuesserTest(unittest2.TestCase):
             raw, uncompressed)
 
     def test_30_7z_single_file(self):
-        uncompressed = BytesIO("Hello World\n")
         # no file, only the content is packed, use 7zr -si to make it
         raw = BytesIO("7z\xbc\xaf'\x1c\x00\x03\\\x01\xca\xbe\x11\x00\x00\x00"
             "\x00\x00\x00\x00;\x00\x00\x00\x00\x00\x00\x00\xccl\x1bR\x00"
@@ -195,7 +194,7 @@ class GuesserTest(unittest2.TestCase):
             "\x01\x00\x00\x00\x00\x00\x00\x00")
         self._check_decompressor(
             StreamDecompressor.decompressors.Un7z,
-            raw, uncompressed)
+            raw, BytesIO("Hello World\n"))
         # only one file, named, but same content
         raw = BytesIO("7z\xbc\xaf'\x1c\x00\x03+v\xeet\x11\x00\x00\x00\x00\x00"
             "\x00\x00B\x00\x00\x00\x00\x00\x00\x00\x10\xb9\x06\x02\x00$"
@@ -207,7 +206,7 @@ class GuesserTest(unittest2.TestCase):
         raw.name = "test_file.7z"
         self._check_decompressor(
             StreamDecompressor.decompressors.Un7z,
-            raw, uncompressed)
+            raw, BytesIO("Hello World\n"))
 
     def test_40_7z_multiple_files(self):
         uncompressed = BytesIO("Hello World\n")
@@ -236,6 +235,7 @@ class GuesserTest(unittest2.TestCase):
             zip.writestr("test_file", uncompressed.getvalue())
         finally:
             zip.close()
+        raw.seek(0)
         self._check_decompressor(
             StreamDecompressor.decompressors.Unzip,
             raw, uncompressed)
@@ -250,6 +250,7 @@ class GuesserTest(unittest2.TestCase):
                 zip.writestr(filename, uncompressed.getvalue())
         finally:
             zip.close()
+        raw.seek(0)
         self._check_decompressor(
             StreamDecompressor.decompressors.Unzip,
             raw, uncompressed)
