@@ -23,15 +23,20 @@ class Archive(unittest2.TestCase):
         fileobj = BytesIO('')
         try:
             self.assertEqual(
-                'xxx', BaseNameTest.__guess__('mime1', 'xxx', fileobj))
-            self.assertEqual(
                 'xxx', BaseNameTest.__guess__('mime2', 'xxx', fileobj))
             self.assertEqual(
-                'xxx', BaseNameTest.__guess__('xxx', 'xxx.ext1', fileobj))
-            self.assertEqual(
                 'xxx', BaseNameTest.__guess__('mime1', 'xxx.ext2', fileobj))
+            self.assertEqual(
+                'xxx', BaseNameTest.__guess__('mime2', 'xxx.ext1', fileobj))
         except ValueError, e:
             self.fail(repr(e))
+        try:
+            self.assertEqual(
+                'xxx', BaseNameTest.__guess__('xxx', 'xxx.ext1', fileobj))
+        except ValueError, e:
+            pass
+        else:
+            self.fail("guessing should has failed")
 
 
 class ArchiveFileTest(unittest2.TestCase):
