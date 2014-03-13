@@ -42,6 +42,8 @@ class Unzip(ArchivePack):
         # whole content
         fileobj = make_seekable(fileobj)
         self.zipfile = zipfile.ZipFile(fileobj)
+        if self.single():
+            self.__compression__ += ':' + self.members()[0].filename
         ArchivePack.__init__(self, name, source=fileobj,
             fileobj=(self.single() and self.open(self.members()[0])))
 

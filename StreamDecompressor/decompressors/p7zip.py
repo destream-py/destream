@@ -72,6 +72,7 @@ class Un7z(ArchivePack):
         if len(self._members) == 1:
             stream = self.open(self._members[0], stream=True)
             stream_name = self._members[0].filename
+            self.__compression__ += ':' + stream_name
         else:
             stream_name = name
             stream = self.fileobj

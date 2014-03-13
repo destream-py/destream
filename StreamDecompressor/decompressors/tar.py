@@ -66,6 +66,7 @@ class Untar(ArchivePack):
         if self._single:
             stream = FileMember(self.tarfile, first_member)
             stream_name = first_member.name
+            self.__compression__ += ':' + stream_name
         else:
             stream_name = name
             stream = source

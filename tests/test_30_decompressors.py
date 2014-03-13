@@ -42,6 +42,11 @@ class GuesserTest(unittest2.TestCase):
                         archive.realname, os.path.basename(filename),
                         "the archive should have a realname set on the "
                         "single member's filename")
+                    if decompressed_fileobj.name is not None:
+                        self.assertEqual(
+                            archive.realname, decompressed_fileobj.name,
+                            "the file inside the archive does not have "
+                            "the right name")
             else:
                 # check that archive realname with extension match its source
                 # realname
@@ -139,11 +144,12 @@ class GuesserTest(unittest2.TestCase):
 
     def test_30_tar_single_file(self):
         uncompressed = BytesIO("Hello World\n")
+        uncompressed.name = 'test_file'
         raw = BytesIO()
         raw.name = "test_file.tar"
         tar = tarfile.open(fileobj=raw, mode='w')
         try:
-            tarinfo = tarfile.TarInfo('test_file')
+            tarinfo = tarfile.TarInfo(uncompressed.name)
             tarinfo.size = len(uncompressed.getvalue())
             tar.addfile(tarinfo, uncompressed)
             uncompressed.seek(0)
@@ -184,6 +190,8 @@ class GuesserTest(unittest2.TestCase):
             raw, uncompressed)
 
     def test_30_7z_single_file(self):
+        uncompressed = BytesIO("Hello World\n")
+        uncompressed.name = None
         # no file, only the content is packed, use 7zr -si to make it
         raw = BytesIO("7z\xbc\xaf'\x1c\x00\x03\\\x01\xca\xbe\x11\x00\x00\x00"
             "\x00\x00\x00\x00;\x00\x00\x00\x00\x00\x00\x00\xccl\x1bR\x00"
@@ -194,7 +202,9 @@ class GuesserTest(unittest2.TestCase):
             "\x01\x00\x00\x00\x00\x00\x00\x00")
         self._check_decompressor(
             StreamDecompressor.decompressors.Un7z,
-            raw, BytesIO("Hello World\n"))
+            raw, uncompressed)
+        uncompressed = BytesIO("Hello World\n")
+        uncompressed.name = 'a'
         # only one file, named, but same content
         raw = BytesIO("7z\xbc\xaf'\x1c\x00\x03+v\xeet\x11\x00\x00\x00\x00\x00"
             "\x00\x00B\x00\x00\x00\x00\x00\x00\x00\x10\xb9\x06\x02\x00$"
@@ -206,7 +216,7 @@ class GuesserTest(unittest2.TestCase):
         raw.name = "test_file.7z"
         self._check_decompressor(
             StreamDecompressor.decompressors.Un7z,
-            raw, BytesIO("Hello World\n"))
+            raw, uncompressed)
 
     def test_40_7z_multiple_files(self):
         uncompressed = BytesIO("Hello World\n")
@@ -228,6 +238,7 @@ class GuesserTest(unittest2.TestCase):
 
     def test_30_zip_single_file(self):
         uncompressed = BytesIO("Hello World\n")
+        uncompressed.name = 'test_file'
         raw = BytesIO()
         raw.name = "test_file.zip"
         zip = zipfile.ZipFile(raw, 'w')
@@ -268,6 +279,7 @@ class GuesserTest(unittest2.TestCase):
 
     def test_30_rar_single_file(self):
         uncompressed = BytesIO("Hello World\n")
+        uncompressed.name = 'a'
         raw = BytesIO(
             "Rar!\x1a\x07\x00\xcf\x90s\x00\x00\r\x00\x00\x00\x00\x00\x00\x00"
             "\x98\xdct \x90#\x00\x19\x00\x00\x00\x0c\x00\x00\x00\x03\xe3\xe5"
