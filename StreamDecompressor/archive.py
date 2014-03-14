@@ -64,11 +64,11 @@ class Archive(io.BufferedReader):
         assert hasattr(cls, '__mimes__'), \
             "this function is useless without __mimes__"
         realname = name
-        if isinstance(name, basestring):
-            match = re_extension.search(name)
-            if hasattr(cls, '__extensions__') and \
-               match.group(2) and match.group(3) in cls.__extensions__:
-                realname = match.group(1)
+        match = re_extension.search(name)
+        if hasattr(cls, '__extensions__') and \
+           match.group(2) and \
+           os.path.normcase(match.group(3)) in cls.__extensions__:
+            realname = match.group(1)
         if mime not in cls.__mimes__:
             raise ValueError(
                 (cls, mime, name, fileobj),

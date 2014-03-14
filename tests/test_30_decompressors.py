@@ -11,13 +11,16 @@ import StreamDecompressor
 
 
 class GuesserTest(unittest2.TestCase):
-    def _check_decompressor(self,
-            decompressor, compressed_fileobj, decompressed_fileobj):
+    def _check_decompressor(self, decompressor, compressed_fileobj,
+            decompressed_fileobj, expected_name=None):
         try:
             decompressor.__checkavailability__()
         except:
             self.skipTest("decompressor not available")
-        with StreamDecompressor.open(fileobj=compressed_fileobj) as archive:
+        if expected_name is None:
+            expected_name = decompressed_fileobj.name
+        with StreamDecompressor.open(
+                fileobj=compressed_fileobj, closefd=False) as archive:
             # check that the decompressor has been used
             self.assertIn(
                 decompressor,
@@ -42,11 +45,11 @@ class GuesserTest(unittest2.TestCase):
                         archive.realname, os.path.basename(filename),
                         "the archive should have a realname set on the "
                         "single member's filename")
-                    if decompressed_fileobj.name is not None:
-                        self.assertEqual(
-                            archive.realname, decompressed_fileobj.name,
-                            "the file inside the archive does not have "
-                            "the right name")
+                if expected_name is not None:
+                    self.assertEqual(
+                        archive.realname, expected_name,
+                        "the file inside the archive does not have "
+                        "the right name")
             else:
                 # check that archive realname with extension match its source
                 # realname
@@ -109,6 +112,10 @@ class GuesserTest(unittest2.TestCase):
                             + filepath)
                 finally:
                     shutil.rmtree(tempdir)
+        # force closing archive by deleting the instance
+        archive = None
+        self.assertFalse(compressed_fileobj.closed)
+        self.assertFalse(decompressed_fileobj.closed)
 
     def test_10_plain_text(self):
         fileobj = BytesIO("Hello World\n")
@@ -123,6 +130,7 @@ class GuesserTest(unittest2.TestCase):
 
     def test_20_external_pipe_lzma(self):
         uncompressed = BytesIO("Hello World\n")
+        uncompressed.name = 'test_file'
         raw = BytesIO(
             ']\x00\x00\x80\x00\xff\xff\xff\xff\xff\xff\xff\xff\x00'
             '$\x19I\x98o\x10\x11\xc8_\xe6\xd5\x8a\x04\xda\x01\xc7'
@@ -134,13 +142,27 @@ class GuesserTest(unittest2.TestCase):
 
     def test_20_external_pipe_gzip(self):
         uncompressed = BytesIO("Hello World\n")
+        uncompressed.name = 'test_file'
         raw = BytesIO(
             '\x1f\x8b\x08\x00\x96\xfa\rS\x00\x03\xf3H\xcd\xc9\xc9W\x08\xcf'
             '/\xcaI\xe1\x02\x00\xe3\xe5\x95\xb0\x0c\x00\x00\x00')
-        raw.name = "test_file.gz"
-        self._check_decompressor(
-            StreamDecompressor.decompressors.Gunzip,
-            raw, uncompressed)
+        for ext, expected_name in [
+                    ('.gz', uncompressed.name),
+                    ('.GZ', uncompressed.name),
+                    ('-gz', uncompressed.name),
+                    ('.z', uncompressed.name),
+                    ('-z', uncompressed.name),
+                    ('_z', uncompressed.name),
+                    ('.tgz', uncompressed.name + '.tar'),
+                    ('.taz', uncompressed.name + '.tar'),
+                    ('.TAZ', uncompressed.name + '.tar'),
+                ]:
+            uncompressed.seek(0)
+            raw.seek(0)
+            raw.name = "test_file" + ext
+            self._check_decompressor(
+                StreamDecompressor.decompressors.Gunzip,
+                raw, uncompressed, expected_name)
 
     def test_30_tar_single_file(self):
         uncompressed = BytesIO("Hello World\n")
@@ -162,6 +184,7 @@ class GuesserTest(unittest2.TestCase):
 
     def test_40_tar_multiple_files(self):
         uncompressed = BytesIO("Hello World\n")
+        uncompressed.name = None
         raw = BytesIO()
         raw.name = "test_file.tar"
         tar = tarfile.open(fileobj=raw, mode='w')
@@ -180,6 +203,7 @@ class GuesserTest(unittest2.TestCase):
 
     def test_20_external_pipe_xz(self):
         uncompressed = BytesIO("Hello World\n")
+        uncompressed.name = 'test_file'
         raw = BytesIO(
             '\xfd7zXZ\x00\x00\x04\xe6\xd6\xb4F\x02\x00!\x01\x16\x00\x00\x00'
             't/\xe5\xa3\x01\x00\x0bHello World\n\x00"\xe0u?\xd5\xed8>\x00\x01'
@@ -220,6 +244,7 @@ class GuesserTest(unittest2.TestCase):
 
     def test_40_7z_multiple_files(self):
         uncompressed = BytesIO("Hello World\n")
+        uncompressed.name = None
         raw = BytesIO(
             '7z\xbc\xaf\'\x1c\x00\x03\x10\xads\x82x\x00\x00\x00\x00\x00\x00'
             '\x00!\x00\x00\x00\x00\x00\x00\x00\x7f$\xaa\x86\x00$\x19I\x98o'
@@ -253,6 +278,7 @@ class GuesserTest(unittest2.TestCase):
 
     def test_40_zip_multiple_files(self):
         uncompressed = BytesIO("Hello World\n")
+        uncompressed.name = None
         raw = BytesIO()
         raw.name = "test_file.zip"
         zip = zipfile.ZipFile(raw, 'w')
@@ -266,16 +292,25 @@ class GuesserTest(unittest2.TestCase):
             StreamDecompressor.decompressors.Unzip,
             raw, uncompressed)
 
-    def test_20_external_pipe_bz2(self):
+    def test_20_external_pipe_bzip2(self):
         uncompressed = BytesIO("Hello World\n")
+        uncompressed.name = "test_file"
         raw = BytesIO(
             'BZh91AY&SY\xd8r\x01/\x00\x00\x01W\x80\x00\x10@\x00\x00@\x00'
             '\x80\x06\x04\x90\x00 \x00"\x06\x86\xd4 \xc9\x88\xc7i\xe8(\x1f'
             '\x8b\xb9"\x9c(Hl9\x00\x97\x80')
-        raw.name = "test_file.bz2"
-        self._check_decompressor(
-            StreamDecompressor.decompressors.Bunzip2,
-            raw, uncompressed)
+        for ext, expected_name in [
+                    ('.bz2', uncompressed.name),
+                    ('.bz', uncompressed.name),
+                    ('.tbz', uncompressed.name + '.tar'),
+                    ('.tbz2', uncompressed.name + '.tar'),
+                ]:
+            uncompressed.seek(0)
+            raw.seek(0)
+            raw.name = "test_file" + ext
+            self._check_decompressor(
+                StreamDecompressor.decompressors.Bunzip2,
+                raw, uncompressed, expected_name)
 
     def test_30_rar_single_file(self):
         uncompressed = BytesIO("Hello World\n")
@@ -293,6 +328,7 @@ class GuesserTest(unittest2.TestCase):
 
     def test_40_rar_multiple_files(self):
         uncompressed = BytesIO("Hello World\n")
+        uncompressed.name = None
         raw = BytesIO(
             "Rar!\x1a\x07\x00\xcf\x90s\x00\x00\r\x00\x00\x00\x00\x00\x00\x00"
             "d\xd9t \x80#\x00\x19\x00\x00\x00\x0c\x00\x00\x00\x03\xe3\xe5\x95"

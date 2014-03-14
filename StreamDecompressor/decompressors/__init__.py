@@ -4,7 +4,7 @@ import inspect
 from StreamDecompressor import archive
 
 from gzip import *
-from bz2 import *
+from bzip2 import *
 from lzma import *
 from p7zip import *
 from tar import *
