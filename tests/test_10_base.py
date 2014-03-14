@@ -72,6 +72,15 @@ class ArchiveFileTest(unittest2.TestCase):
             fileobj.close()
             os.unlink(filename)
 
+    def test_30_closefd(self):
+        fileobj = BytesIO()
+        archive = ArchiveFile(fileobj=fileobj, closefd=False)
+        archive.close()
+        self.assertFalse(fileobj.closed)
+        archive = ArchiveFile(fileobj=fileobj, closefd=True)
+        archive.close()
+        self.assertTrue(fileobj.closed)
+
 
 class CatsEye(ExternalPipe):
     __command__ = ['cat']

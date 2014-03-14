@@ -25,7 +25,7 @@ class Archive(io.BufferedReader):
     """
     Base class to Archive file
     """
-    def __init__(self, name, fileobj=None, source=None):
+    def __init__(self, name, fileobj=None, source=None, closefd=True):
         assert type(self) != Archive, \
             "This class can not be used in standalone"
         if not fileobj:
@@ -46,6 +46,7 @@ class Archive(io.BufferedReader):
             self.name = getattr(fileobj, 'name', name)
         self.realname = name or ''
         self.source = source
+        self.closefd = closefd
         if isinstance(source, Archive):
             self.__decompressors__ = source.__decompressors__ + [type(self)]
             self.compressions = list(source.compressions)
@@ -75,6 +76,10 @@ class Archive(io.BufferedReader):
                 "can not decompress fileobj using class %s" % cls.__name__)
         return realname
 
+    def close(self):
+        if self.closefd:
+            super(Archive, self).close()
+            self.source.close()
 
 class ArchivePack(Archive):
     """
@@ -107,14 +112,14 @@ class ArchiveFile(Archive):
     """
     Make an archive from a file-object
     """
-    def __init__(self, fileobj=None, name=None):
+    def __init__(self, fileobj=None, name=None, closefd=True):
         if not fileobj:
             if not name:
                 raise TypeError("Either name, fileobj must be specified")
             fileobj = io.FileIO(name)
         elif not name and hasattr(fileobj, 'name'):
             name = fileobj.name
-        Archive.__init__(self, name, fileobj, source=fileobj)
+        Archive.__init__(self, name, fileobj, source=fileobj, closefd=closefd)
 
 
 class ArchiveTemp(Archive):

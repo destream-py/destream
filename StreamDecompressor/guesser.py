@@ -23,15 +23,15 @@ class Guesser(object):
                 continue
             try:
                 realname = decompressor.__guess__(
-                    mime, archive.realname, archive)
+                    mime, str(archive.realname), archive)
                 decompressor.__checkavailability__()
                 return decompressor(realname, archive)
             except ValueError:
                 pass
         return None
 
-    def open(self, name=None, fileobj=None):
-        archive = ArchiveFile(fileobj, name)
+    def open(self, name=None, fileobj=None, closefd=True):
+        archive = ArchiveFile(fileobj, name, closefd=closefd)
 
         for i in range(self.limit):
             guessed = self.guess(archive)
@@ -42,8 +42,8 @@ class Guesser(object):
         raise Exception("More than 10 pipes or infinite loop detected")
 
 
-def open(name=None, fileobj=None):
+def open(name=None, fileobj=None, closefd=True):
     """
     Use all decompressor possible to make the stream
     """
-    return Guesser().open(name=name, fileobj=fileobj)
+    return Guesser().open(name=name, fileobj=fileobj, closefd=closefd)
