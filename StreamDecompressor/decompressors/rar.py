@@ -48,9 +48,14 @@ class Member(object):
 class Unrar(ArchivePack):
     __mimes__ = ['application/x-rar']
     __extensions__ = ['rar']
-    __command__ = ['unrar']
+    __command__ = ['rar']
     __compression__ = 'rar'
-    __fallbackcommands__ = ['rar']
+    # NOTE:
+    #   https://en.wikipedia.org/wiki/Unrar
+    #   Unrar is the name of two different programs, we should prefer rar by
+    #   default to make sure to have the most recent and compatible version if
+    #   available.
+    __fallbackcommands__ = ['unrar']
 
     @classmethod
     def __checkavailability__(cls):
