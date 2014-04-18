@@ -53,30 +53,30 @@ class Unrar(ArchivePack):
     # NOTE:
     #   https://en.wikipedia.org/wiki/Unrar
     #   Unrar is the name of two different programs, we should prefer rar by
-    #   default to make sure to have the most recent and compatible version if
+    #   default to make sure to use the most recent and compatible version if
     #   available.
     __fallbackcommands__ = ['unrar']
 
     @classmethod
     def __checkavailability__(cls):
-        return ExternalPipe.__checkavailability__.im_func(cls)
+        ExternalPipe.__checkavailability__.im_func(cls)
+        p = Popen(cls.__command__, stdout=PIPE)
+        output = p.communicate()[0]
+        matches = re.search("(?:UN)?RAR (\d+\.\d+)", output)
+        assert matches, "%s: can not determine version" \
+                        % cls.__command__[0]
+        cls.version = tuple(Version(matches.group(0)).version)
+        # NOTE: the parameter vta is available from version 5
+        assert cls.version >= (5, 0), "%s: incompatible version %s" \
+                                      % (cls.__command__[0], cls.version)
 
     def __init__(self, name, fileobj):
         self.fileobj = ArchiveTemp(fileobj)
         p = Popen(self.__command__ + ['vta', self.fileobj.name],
                   stdout=PIPE)
-        hunks = iter(p.stdout.read().split("\n\n"))
+        output = p.communicate()[0]
+        hunks = iter(output.split("\n\n"))
         self.information = hunks.next().strip()
-        matches = re.match("(\S+| (?! ))+", self.information)
-        assert matches, "can not parse rar information header"
-        self.version = tuple(
-            Version(matches.group(0).replace(' ', '.'))\
-            .version[1:])
-        # NOTE: I only know it works with version 5 but not with version 3
-        # it could works with version 4...
-        assert self.version >= (4,), \
-            "This version of %s (%s) is probably not compatible" \
-            % (self.__command__[0], self.version)
         self.header = Header(hunks.next())
         self._members = [m for m in (Member(h) for h in hunks)]
         if len(self._members) == 1:
