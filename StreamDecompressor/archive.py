@@ -169,7 +169,6 @@ class ExternalPipe(Archive, threading.Thread):
             "This class can not be used in standalone"
         assert hasattr(self, '__command__'), \
             "__command__ attribute is missing in class %s" % type(self)
-        self._closed = False
         threading.Thread.__init__(self)
         self.p = Popen(self.__command__, stdout=PIPE, stdin=PIPE, stderr=PIPE)
         Archive.__init__(self, name, fileobj=self.p.stdout, source=stdin)
@@ -196,22 +195,23 @@ class ExternalPipe(Archive, threading.Thread):
     def run(self):
         try:
             self.p.stdin.writelines(self.source)
-        except IOError:
-            self.close(kill=True)
+        except IOError, exc:
+            # NOTE: regular exception when we close the pipe, just hide it
+            if not exc.errno == errno.EPIPE:
+                raise
         else:
             self.p.stdin.close()
-            self.close(kill=False)
 
     @property
     def closed(self):
         return self.p.stdout.closed
 
-    def close(self, kill=True):
-        if not self._closed:
-            if kill:
-                self.p.kill()
-            self._closed = True
+    def close(self):
+        if not self.closed:
+            self.p.terminate()
+            self.join()
+            self.p.stdin.close()
             self.retcode = self.p.wait()
             self.errors = self.p.stderr.read()
-            self.p.stdin.close()
             self.p.stderr.close()
+            self.p.stdout.close()
