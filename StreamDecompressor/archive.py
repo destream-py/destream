@@ -62,18 +62,20 @@ class Archive(io.BufferedReader):
 
     @classmethod
     def __guess__(cls, mime, name, fileobj):
-        assert hasattr(cls, '__mimes__'), \
-            "this function is useless without __mimes__"
+        if getattr(cls, '__uniqueinstance__', False):
+            if cls in fileobj.__decompressors__:
+                raise ValueError("class %s already in the decompressor list")
         realname = name
-        match = re_extension.search(name)
-        if hasattr(cls, '__extensions__') and \
-           match.group(2) and \
-           os.path.normcase(match.group(3)) in cls.__extensions__:
-            realname = match.group(1)
-        if mime not in cls.__mimes__:
-            raise ValueError(
-                (cls, mime, name, fileobj),
-                "can not decompress fileobj using class %s" % cls.__name__)
+        if hasattr(cls, '__mimes__'):
+            match = re_extension.search(name)
+            if hasattr(cls, '__extensions__') and \
+               match.group(2) and \
+               os.path.normcase(match.group(3)) in cls.__extensions__:
+                realname = match.group(1)
+            if mime not in cls.__mimes__:
+                raise ValueError(
+                    (cls, mime, name, fileobj),
+                    "can not decompress fileobj using class %s" % cls.__name__)
         return realname
 
     def close(self):
