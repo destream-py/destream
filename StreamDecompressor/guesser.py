@@ -12,12 +12,12 @@ class Guesser(object):
     """
     def __init__(self, decompressors=builtin_decompressors,
                  extra_decompressors=[], limit=10):
-        self.decompressors = sorted(decompressors + extra_decompressors)
+        self.decompressors = decompressors + extra_decompressors
         self.limit = limit
 
     def guess(self, archive):
         mime = magic.from_buffer(archive.peek(1024), mime=True)
-        for _, decompressor in self.decompressors:
+        for _, decompressor in sorted(self.decompressors):
             if isinstance(archive, ArchivePack) and \
                type(archive) is decompressor:
                 continue
