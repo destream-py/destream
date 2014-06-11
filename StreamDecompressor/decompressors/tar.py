@@ -31,6 +31,10 @@ class FileMember(io.IOBase, tarlib.ExFileObject):
     def read(self, n=-1):
         return tarlib.ExFileObject.read(self, (n if n > -1 else None))
 
+    def close(self):
+        self.fileobj.fileobj.close()
+        self.closed = True
+
     # This code is not from scratch but based on tarfile read() method
     def peek(self, n):
         buf = ""
@@ -90,3 +94,12 @@ class Untar(ArchivePack):
 
     def extractall(self, path, members=None):
         return self.tarfile.extractall(path, members)
+
+    def close(self):
+        return super(Untar, self).close() if self.single() \
+            else self.tarfile.close()
+
+    @property
+    def closed(self):
+        return super(Untar, self).closed if self.single() \
+            else self.tarfile.closed
