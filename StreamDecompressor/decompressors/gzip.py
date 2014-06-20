@@ -4,7 +4,10 @@ __all__ = ['Gunzip']
 
 
 class Gunzip(ExternalPipe):
-    __mimes__ = ['application/x-gzip']
+    __mimes__ = [
+        'application/x-gzip',
+        'application/gzip',
+    ]
     __extensions__ = ['gz']
     __command__ = ['gunzip']
     __compression__ = 'gzip'
