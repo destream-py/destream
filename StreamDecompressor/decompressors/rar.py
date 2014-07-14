@@ -65,7 +65,7 @@ class Unrar(ArchivePack):
         matches = re.search("(?:UN)?RAR (\d+\.\d+)", output)
         assert matches, "%s: can not determine version" \
                         % cls.__command__[0]
-        cls.version = tuple(Version(matches.group(0)).version)
+        cls.version = tuple(Version(matches.group(1)).version)
         # NOTE: the parameter vta is available from version 5
         assert cls.version >= (5, 0), "%s: incompatible version %s" \
                                       % (cls.__command__[0], cls.version)
