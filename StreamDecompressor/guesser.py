@@ -1,7 +1,7 @@
 import magic
 
-from archive import ArchiveFile, ArchivePack
-from decompressors import builtin_decompressors
+from StreamDecompressor.archive import ArchiveFile, ArchivePack
+from StreamDecompressor.decompressors import builtin_decompressors
 
 __all__ = ['Guesser', 'open']
 

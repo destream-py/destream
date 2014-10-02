@@ -1,3 +1,3 @@
-from archive import *
-from decompressors import *
-from guesser import *
+from StreamDecompressor.archive import *
+from StreamDecompressor.decompressors import *
+from StreamDecompressor.guesser import *

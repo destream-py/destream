@@ -3,14 +3,14 @@ import inspect
 
 from StreamDecompressor import archive
 
-from gzip import *
-from bzip2 import *
-from lzma import *
-from p7zip import *
-from tar import *
-from xz import *
-from zip import *
-from rar import *
+from StreamDecompressor.decompressors.gzip import *
+from StreamDecompressor.decompressors.bzip2 import *
+from StreamDecompressor.decompressors.lzma import *
+from StreamDecompressor.decompressors.p7zip import *
+from StreamDecompressor.decompressors.tar import *
+from StreamDecompressor.decompressors.xz import *
+from StreamDecompressor.decompressors.zip import *
+from StreamDecompressor.decompressors.rar import *
 
 builtin_decompressors = [
     (0, symbol)
