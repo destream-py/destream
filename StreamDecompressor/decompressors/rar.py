@@ -76,8 +76,9 @@ class Unrar(ArchivePack):
         self.information = hunks.next().strip()
         self.header = Header(hunks.next())
         self._members = [m for m in (Member(h) for h in hunks)]
-        if len(self._members) == 1:
-            stream = self.open(self._members[0], stream=True)
+        self._stream = (len(self._members) == 1)
+        if self._stream:
+            stream = self.open(self._members[0])
             stream_name = self._members[0].filename
             self.__compression__ += ':' + stream_name
         else:
@@ -89,12 +90,13 @@ class Unrar(ArchivePack):
     def members(self):
         return self._members
 
-    def open(self, member, stream=True):
+    def open(self, member):
         p = Popen(self.__command__ +
             ['p', '-ierr', self.fileobj.name,
              (member.filename if isinstance(member, Member) else member)],
             stdout=PIPE, stderr=PIPE)
-        if stream:
+        if self._stream:
+            self._p = p
             return p.stdout
         else:
             temp = ArchiveTemp(p.stdout)
@@ -103,6 +105,21 @@ class Unrar(ArchivePack):
                 raise CalledProcessError(
                     retcode, self.__command__, output=p.stderr.read())
             return temp
+
+    @property
+    def closed(self):
+        if self._stream:
+            return self._p.stdout.closed
+        else:
+            return self.fileobj.closed
+
+    def close(self):
+        if self._stream:
+            if not self.closed:
+                self._p.stdout.close()
+                self._p.wait()
+        else:
+            self.fileobj.close()
 
     def extract(self, member, path):
         p = Popen(self.__command__ +
