@@ -4,6 +4,7 @@ import sys
 import errno
 import io
 import tempfile
+from shutil import copyfileobj
 from subprocess import Popen, PIPE
 import threading
 from distutils.spawn import find_executable
@@ -188,7 +189,7 @@ class ExternalPipe(Archive, threading.Thread):
 
     def run(self):
         try:
-            self.p.stdin.writelines(self.source)
+            copyfileobj(self.source, self.p.stdin)
         except IOError, exc:
             # NOTE: regular exception when we close the pipe, just hide it
             if not exc.errno == errno.EPIPE:
