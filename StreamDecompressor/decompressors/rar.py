@@ -1,7 +1,7 @@
 import struct
 import binascii
 import re
-from subprocess import Popen, PIPE, CalledProcessError
+from subprocess import check_output, Popen, PIPE, CalledProcessError
 from distutils.version import LooseVersion as Version
 
 from StreamDecompressor import ArchivePack, ArchiveTemp, ExternalPipe
@@ -60,8 +60,7 @@ class Unrar(ArchivePack):
     @classmethod
     def __checkavailability__(cls):
         ExternalPipe.__checkavailability__.im_func(cls)
-        p = Popen(cls.__command__, stdout=PIPE)
-        output = p.communicate()[0]
+        output = check_output(cls.__command__)
         matches = re.search("(?:UN)?RAR (\d+\.\d+)", output)
         assert matches, "%s: can not determine version" \
                         % cls.__command__[0]
@@ -72,9 +71,7 @@ class Unrar(ArchivePack):
 
     def __init__(self, name, fileobj):
         self.fileobj = ArchiveTemp(fileobj)
-        p = Popen(self.__command__ + ['vta', self.fileobj.name],
-                  stdout=PIPE)
-        output = p.communicate()[0]
+        output = check_output(self.__command__ + ['vta', self.fileobj.name])
         hunks = iter(output.split("\n\n"))
         self.information = hunks.next().strip()
         self.header = Header(hunks.next())

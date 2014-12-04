@@ -74,7 +74,11 @@ class Archive(io.BufferedReader):
     def close(self):
         if self.closefd:
             super(Archive, self).close()
-            self.source.close()
+
+    def __del__(self):
+        self.close()
+        self.source.close()
+
 
 class ArchivePack(Archive):
     """

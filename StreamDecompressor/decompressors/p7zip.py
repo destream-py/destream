@@ -1,7 +1,7 @@
 import struct
 import binascii
 import re
-from subprocess import Popen, PIPE, CalledProcessError
+from subprocess import check_output, Popen, PIPE, CalledProcessError
 
 from StreamDecompressor import ArchivePack, ArchiveTemp, ExternalPipe
 
@@ -62,9 +62,8 @@ class Un7z(ArchivePack):
 
     def __init__(self, name, fileobj):
         self.fileobj = ArchiveTemp(fileobj)
-        p = Popen(self.__command__ + ['l', self.fileobj.name, '-slt'],
-                  stdout=PIPE)
-        info = p.stdout.read()
+        info = check_output(self.__command__ +
+                            ['l', self.fileobj.name, '-slt'])
         self.header = Header(ereg_header.search(info).group(1))
         self._members = [Member(m.group(1)) \
                         for m in ereg_member.finditer(info,
