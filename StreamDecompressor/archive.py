@@ -8,11 +8,6 @@ from subprocess import Popen, PIPE
 import threading
 from distutils.spawn import find_executable
 
-if sys.version_info < (2, 7):
-    io_name_attr = '_name'
-else:
-    io_name_attr = 'name'
-
 __all__ = """\
         Archive ArchivePack ArchiveFile ArchiveTemp ExternalPipe
         make_seekable
@@ -33,17 +28,14 @@ class Archive(io.BufferedReader):
         elif isinstance(fileobj, file):
             filename = fileobj.name
             fileobj = io.FileIO(fileobj.fileno(), closefd=False)
-            setattr(fileobj, io_name_attr, filename)
+            fileobj.name = filename
         elif isinstance(fileobj, int):
             fileobj = io.FileIO(fileobj, closefd=False)
-            setattr(fileobj, io_name_attr, name)
+            fileobj.name = filename
         assert isinstance(fileobj, io.IOBase), \
             "fileobj must be an instance of io.IOBase or a file, got %s" \
             % type(fileobj)
         io.BufferedReader.__init__(self, fileobj)
-        # TODO: not sure if it is the best things to do...
-        if sys.version_info < (2, 6, 5) and not hasattr(self, 'name'):
-            self.name = getattr(fileobj, 'name', name)
         self.realname = name or ''
         self.source = source
         self.closefd = closefd
@@ -142,7 +134,7 @@ class ArchiveTemp(Archive):
         self.tempfile.writelines(fileobj)
         self.tempfile.seek(0)
         fileio = io.FileIO(self.tempfile.fileno(), closefd=False)
-        setattr(fileio, io_name_attr, self.tempfile.name)
+        fileio.name = self.tempfile.name
         Archive.__init__(self, name, fileio, source=fileobj)
 
 
@@ -154,7 +146,7 @@ def make_seekable(fileobj):
     if isinstance(fileobj, file):
         filename = fileobj.name
         fileobj = io.FileIO(fileobj.fileno(), closefd=False)
-        setattr(fileobj, io_name_attr, filename)
+        fileobj.name = filename
     assert isinstance(fileobj, io.IOBase), \
         "fileobj must be an instance of io.IOBase or a file, got %s" \
         % type(fileobj)
