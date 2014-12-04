@@ -200,19 +200,15 @@ class ExternalPipe(Archive, threading.Thread):
             # NOTE: regular exception when we close the pipe, just hide it
             if not exc.errno == errno.EPIPE:
                 raise
-        else:
-            self.p.stdin.close()
+        self.p.stdin.close()
+        self.p.wait()
 
     @property
     def closed(self):
         return self.p.stdout.closed
 
     def close(self):
-        if not self.closed:
+        super(ExternalPipe, self).close()
+        if self.p.poll() is None:
             self.p.terminate()
             self.join()
-            self.p.stdin.close()
-            self.retcode = self.p.wait()
-            self.errors = self.p.stderr.read()
-            self.p.stderr.close()
-            self.p.stdout.close()
