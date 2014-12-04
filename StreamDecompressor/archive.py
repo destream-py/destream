@@ -134,6 +134,8 @@ class ArchiveTemp(Archive):
             self.tempfile = tempfile.NamedTemporaryFile()
         self.tempfile.writelines(fileobj)
         self.tempfile.seek(0)
+        # NOTE: no need (and you shouldn't need) to close the temporary file,
+        #       it will be automatically closed on __del__()
         fileio = io.FileIO(self.tempfile.fileno(), closefd=False)
         fileio.name = self.tempfile.name
         Archive.__init__(self, name, fileio, source=fileobj)
