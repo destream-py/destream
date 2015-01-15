@@ -32,7 +32,7 @@ class Archive(io.BufferedReader):
             fileobj.name = filename
         elif isinstance(fileobj, int):
             fileobj = io.FileIO(fileobj, closefd=False)
-            fileobj.name = filename
+            fileobj.name = name
         assert isinstance(fileobj, io.IOBase), \
             "fileobj must be an instance of io.IOBase or a file, got %s" \
             % type(fileobj)
