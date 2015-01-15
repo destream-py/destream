@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = "StreamDecompressor",
-    version = "2.0",
+    version = "2.1",
     author = "Cecile Tonglet",
     author_email = "cecile.tonglet@gmail.com",
     description = ("A simple module to decompress streams compressed multiple "
