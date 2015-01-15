@@ -91,20 +91,20 @@ class ArchivePack(Archive):
         return len(self.members()) == 1
 
     def members(self):
-        raise NotImplemented("class %s does not implement this method" \
-            % type(self))
+        raise NotImplementedError(
+            "class %s does not implement this method" % type(self))
 
     def open(self, member):
-        raise NotImplemented("class %s does not implement this method" \
-            % type(self))
+        raise NotImplementedError(
+            "class %s does not implement this method" % type(self))
 
     def extract(self, member, path):
-        raise NotImplemented("class %s does not implement this method" \
-            % type(self))
+        raise NotImplementedError(
+            "class %s does not implement this method" % type(self))
 
     def extractall(self, path, members=None):
-        raise NotImplemented("class %s does not implement this method" \
-            % type(self))
+        raise NotImplementedError(
+            "class %s does not implement this method" % type(self))
 
 
 class ArchiveFile(Archive):
