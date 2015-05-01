@@ -194,7 +194,9 @@ class ExternalPipe(Archive, threading.Thread):
             copyfileobj(self.source, self.p.stdin)
         except IOError, exc:
             # NOTE: regular exception when we close the pipe, just hide it
-            if not exc.errno == errno.EPIPE:
+            if exc.errno == errno.EPIPE:
+                pass
+            else:
                 raise
         self.p.stdin.close()
         self.p.wait()
