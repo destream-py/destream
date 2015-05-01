@@ -59,8 +59,8 @@ class Unrar(ArchivePack):
     __fallbackcommands__ = ['unrar']
 
     @classmethod
-    def __checkavailability__(cls):
-        ExternalPipe.__checkavailability__.im_func(cls)
+    def _check_availability(cls):
+        ExternalPipe._check_availability.im_func(cls)
         output = check_output(cls.__command__)
         matches = re.search("(?:UN)?RAR (\d+\.\d+)", output)
         assert matches, "%s: can not determine version" \

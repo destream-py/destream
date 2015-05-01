@@ -50,7 +50,7 @@ class Archive(io.BufferedReader):
             self.compressions += [self._compression]
 
     @classmethod
-    def __checkavailability__(self):
+    def _check_availability(self):
         pass
 
     @classmethod
@@ -176,7 +176,7 @@ class ExternalPipe(Archive, threading.Thread):
         self.start()
 
     @classmethod
-    def __checkavailability__(cls):
+    def _check_availability(cls):
         assert cls is not ExternalPipe, \
             "This class can not be used in standalone"
         assert hasattr(cls, '__command__'), \

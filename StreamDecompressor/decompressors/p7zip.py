@@ -58,8 +58,8 @@ class Un7z(ArchivePack):
     _compression = '7z'
 
     @classmethod
-    def __checkavailability__(cls):
-        return ExternalPipe.__checkavailability__.im_func(cls)
+    def _check_availability(cls):
+        return ExternalPipe._check_availability.im_func(cls)
 
     def __init__(self, name, fileobj):
         self.fileobj = ArchiveTemp(fileobj)

@@ -14,7 +14,7 @@ class GuesserTest(unittest2.TestCase):
     def _check_decompressor(self, decompressor, compressed_fileobj,
             decompressed_fileobj, expected_name=None):
         try:
-            decompressor.__checkavailability__()
+            decompressor._check_availability()
         except:
             self.skipTest("decompressor not available")
         if expected_name is None:

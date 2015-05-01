@@ -24,7 +24,7 @@ class Guesser(object):
             try:
                 realname = decompressor.__guess__(
                     mime, str(archive.realname), archive)
-                decompressor.__checkavailability__()
+                decompressor._check_availability()
                 return decompressor(realname, archive)
             except ValueError:
                 pass
