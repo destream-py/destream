@@ -4,7 +4,7 @@ __all__ = ['Gunzip']
 
 
 class Gunzip(ExternalPipe):
-    __mimes__ = [
+    _mimes = [
         'application/x-gzip',
         'application/gzip',
     ]
@@ -15,7 +15,7 @@ class Gunzip(ExternalPipe):
 
     @classmethod
     def _guess(cls, mime, name, fileobj):
-        if mime not in cls.__mimes__:
+        if mime not in cls._mimes:
             raise ValueError("not a gzip compression")
         lowered = name.lower()
         if lowered.endswith('.gz'):

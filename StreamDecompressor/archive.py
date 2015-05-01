@@ -59,13 +59,13 @@ class Archive(io.BufferedReader):
             if cls in fileobj._decompressors:
                 raise ValueError("class %s already in the decompressor list")
         realname = name
-        if hasattr(cls, '__mimes__'):
+        if hasattr(cls, '_mimes'):
             match = RE_EXTENSION.search(name)
             if hasattr(cls, '_extensions') and \
                match.group(2) and \
                os.path.normcase(match.group(3)) in cls._extensions:
                 realname = match.group(1)
-            if mime not in cls.__mimes__:
+            if mime not in cls._mimes:
                 raise ValueError(
                     (cls, mime, name, fileobj),
                     "can not decompress fileobj using class %s" % cls.__name__)

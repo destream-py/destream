@@ -46,7 +46,7 @@ class Member(object):
         return self.type == 'Directory'
 
 class Unrar(ArchivePack):
-    __mimes__ = ['application/x-rar']
+    _mimes = ['application/x-rar']
     _extensions = ['rar']
     __command__ = ['rar']
     __compression = 'rar'

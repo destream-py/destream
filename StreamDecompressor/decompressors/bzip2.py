@@ -4,7 +4,7 @@ __all__ = ['Bunzip2']
 
 
 class Bunzip2(ExternalPipe):
-    __mimes__ = ['application/x-bzip2']
+    _mimes = ['application/x-bzip2']
     _extensions = ['bz2', 'bz', 'tbz2', 'tbz']
     __command__ = ['bunzip2']
     _compression = 'bzip2'

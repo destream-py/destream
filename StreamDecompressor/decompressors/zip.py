@@ -8,7 +8,7 @@ __all__ = ['Unzip']
 
 
 class Unzip(ArchivePack):
-    __mimes__ = ['application/zip']
+    _mimes = ['application/zip']
     _extensions = ['zip']
     __compression = 'zip'
     _compression = 'zip'
