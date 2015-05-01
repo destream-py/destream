@@ -75,10 +75,6 @@ class Archive(io.BufferedReader):
         if getattr(self, 'closefd', True):
             super(Archive, self).close()
 
-    def __del__(self):
-        self.close()
-        self.source.close()
-
 
 class ArchivePack(Archive):
     """
