@@ -86,7 +86,6 @@ class CatsEye(ExternalPipe):
     _command = ['cat']
     _compression = 'cat'
     _unique_instance = True
-    __priority__ = 10
 
 
 class ExternalPipeTest(unittest2.TestCase):
