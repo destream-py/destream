@@ -22,7 +22,7 @@ class Guesser(object):
                type(archive) is decompressor:
                 continue
             try:
-                realname = decompressor.__guess__(
+                realname = decompressor._guess(
                     mime, str(archive.realname), archive)
                 decompressor._check_availability()
                 return decompressor(realname, archive)

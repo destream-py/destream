@@ -14,7 +14,7 @@ class Gunzip(ExternalPipe):
     _compression = 'gzip'
 
     @classmethod
-    def __guess__(cls, mime, name, fileobj):
+    def _guess(cls, mime, name, fileobj):
         if mime not in cls.__mimes__:
             raise ValueError("not a gzip compression")
         lowered = name.lower()

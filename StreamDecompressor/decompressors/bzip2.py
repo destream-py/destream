@@ -10,7 +10,7 @@ class Bunzip2(ExternalPipe):
     _compression = 'bzip2'
 
     @classmethod
-    def __guess__(cls, mime, name, fileobj):
+    def _guess(cls, mime, name, fileobj):
         is_tar = name.endswith('.tbz2') or name.endswith('.tbz')
-        realname = super(Bunzip2, cls).__guess__(mime, name, fileobj)
+        realname = super(Bunzip2, cls)._guess(mime, name, fileobj)
         return realname + '.tar' if is_tar else realname

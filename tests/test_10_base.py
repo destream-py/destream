@@ -23,16 +23,16 @@ class Archive(unittest2.TestCase):
         fileobj = BytesIO('')
         try:
             self.assertEqual(
-                'xxx', BaseNameTest.__guess__('mime2', 'xxx', fileobj))
+                'xxx', BaseNameTest._guess('mime2', 'xxx', fileobj))
             self.assertEqual(
-                'xxx', BaseNameTest.__guess__('mime1', 'xxx.ext2', fileobj))
+                'xxx', BaseNameTest._guess('mime1', 'xxx.ext2', fileobj))
             self.assertEqual(
-                'xxx', BaseNameTest.__guess__('mime2', 'xxx.ext1', fileobj))
+                'xxx', BaseNameTest._guess('mime2', 'xxx.ext1', fileobj))
         except ValueError, e:
             self.fail(repr(e))
         try:
             self.assertEqual(
-                'xxx', BaseNameTest.__guess__('xxx', 'xxx.ext1', fileobj))
+                'xxx', BaseNameTest._guess('xxx', 'xxx.ext1', fileobj))
         except ValueError, e:
             pass
         else:
@@ -87,7 +87,7 @@ class CatsEye(ExternalPipe):
     __priority__ = 10
 
     @classmethod
-    def __guess__(cls, mime, name, archive):
+    def _guess(cls, mime, name, archive):
         if cls in archive._decompressors:
             raise ValueError("oh no, not again!")
         print "don't skip"

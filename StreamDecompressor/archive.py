@@ -54,7 +54,7 @@ class Archive(io.BufferedReader):
         pass
 
     @classmethod
-    def __guess__(cls, mime, name, fileobj):
+    def _guess(cls, mime, name, fileobj):
         if getattr(cls, '__uniqueinstance__', False):
             if cls in fileobj._decompressors:
                 raise ValueError("class %s already in the decompressor list")
