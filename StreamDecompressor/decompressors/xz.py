@@ -6,6 +6,6 @@ __all__ = ['Unxz']
 class Unxz(ExternalPipe):
     _mimes = ['application/x-xz']
     _extensions = ['xz']
-    __command__ = 'unxz -c'.split()
+    _command = 'unxz -c'.split()
     __compression = 'xz'
     _compression = 'xz'

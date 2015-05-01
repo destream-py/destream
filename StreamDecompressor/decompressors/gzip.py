@@ -9,7 +9,7 @@ class Gunzip(ExternalPipe):
         'application/gzip',
     ]
     _extensions = ['gz']
-    __command__ = ['gunzip']
+    _command = ['gunzip']
     __compression = 'gzip'
     _compression = 'gzip'
 

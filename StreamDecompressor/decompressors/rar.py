@@ -48,7 +48,7 @@ class Member(object):
 class Unrar(ArchivePack):
     _mimes = ['application/x-rar']
     _extensions = ['rar']
-    __command__ = ['rar']
+    _command = ['rar']
     __compression = 'rar'
     _compression = 'rar'
     # NOTE:
@@ -61,18 +61,18 @@ class Unrar(ArchivePack):
     @classmethod
     def _check_availability(cls):
         ExternalPipe._check_availability.im_func(cls)
-        output = check_output(cls.__command__)
+        output = check_output(cls._command)
         matches = re.search("(?:UN)?RAR (\d+\.\d+)", output)
         assert matches, "%s: can not determine version" \
-                        % cls.__command__[0]
+                        % cls._command[0]
         cls.version = tuple(Version(matches.group(1)).version)
         # NOTE: the parameter vta is available from version 5
         assert cls.version >= (5, 0), "%s: incompatible version %s" \
-                                      % (cls.__command__[0], cls.version)
+                                      % (cls._command[0], cls.version)
 
     def __init__(self, name, fileobj):
         self.fileobj = ArchiveTemp(fileobj)
-        output = check_output(self.__command__ + ['vta', self.fileobj.name])
+        output = check_output(self._command + ['vta', self.fileobj.name])
         hunks = iter(output.split("\n\n"))
         self.information = hunks.next().strip()
         self.header = Header(hunks.next())
@@ -92,7 +92,7 @@ class Unrar(ArchivePack):
         return self._members
 
     def open(self, member):
-        p = Popen(self.__command__ +
+        p = Popen(self._command +
             ['p', '-ierr', self.fileobj.name,
              (member.filename if isinstance(member, Member) else member)],
             stdout=PIPE, stderr=PIPE)
@@ -104,7 +104,7 @@ class Unrar(ArchivePack):
             retcode = p.wait()
             if retcode:
                 raise CalledProcessError(
-                    retcode, self.__command__, output=p.stderr.read())
+                    retcode, self._command, output=p.stderr.read())
             return temp
 
     @property
@@ -123,21 +123,21 @@ class Unrar(ArchivePack):
             self.fileobj.close()
 
     def extract(self, member, path):
-        p = Popen(self.__command__ +
+        p = Popen(self._command +
             ['x', self.fileobj.name,
              (member.filename if isinstance(member, Member) else member),
              path], stdout=PIPE)
         retcode = p.wait()
         if retcode:
             raise CalledProcessError(
-                retcode, self.__command__, output=p.stdout.read())
+                retcode, self._command, output=p.stdout.read())
 
     def extractall(self, path, members=[]):
-        p = Popen(self.__command__ +
+        p = Popen(self._command +
             ['x', self.fileobj.name] +
             [(m.filename if isinstance(m, Member) else m) for m in members] +
             [path], stdout=PIPE)
         retcode = p.wait()
         if retcode:
             raise CalledProcessError(
-                retcode, self.__command__, output=p.stdout.read())
+                retcode, self._command, output=p.stdout.read())

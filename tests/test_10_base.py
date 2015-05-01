@@ -83,7 +83,7 @@ class ArchiveFileTest(unittest2.TestCase):
 
 
 class CatsEye(ExternalPipe):
-    __command__ = ['cat']
+    _command = ['cat']
     __priority__ = 10
 
     @classmethod

@@ -53,7 +53,7 @@ class Member(object):
 class Un7z(ArchivePack):
     _mimes = ['application/x-7z-compressed']
     _extensions = ['7z']
-    __command__ = ['7zr']
+    _command = ['7zr']
     __compression = '7z'
     _compression = '7z'
 
@@ -63,7 +63,7 @@ class Un7z(ArchivePack):
 
     def __init__(self, name, fileobj):
         self.fileobj = ArchiveTemp(fileobj)
-        info = check_output(self.__command__ +
+        info = check_output(self._command +
                             ['l', self.fileobj.name, '-slt'])
         self.header = Header(ereg_header.search(info).group(1))
         self._members = [Member(m.group(1)) \
@@ -84,7 +84,7 @@ class Un7z(ArchivePack):
         return self._members
 
     def open(self, member):
-        p = Popen(self.__command__ +
+        p = Popen(self._command +
             ['e', self.fileobj.name, '-so',
             (member.filename if isinstance(member, Member) else member)],
             stdout=PIPE, stderr=PIPE)
@@ -96,7 +96,7 @@ class Un7z(ArchivePack):
             retcode = p.wait()
             if retcode:
                 raise CalledProcessError(
-                    retcode, self.__command__, output=p.stderr.read())
+                    retcode, self._command, output=p.stderr.read())
             return temp
 
     @property
@@ -115,21 +115,21 @@ class Un7z(ArchivePack):
             self.fileobj.close()
 
     def extract(self, member, path):
-        p = Popen(self.__command__ +
+        p = Popen(self._command +
             ['x', self.fileobj.name, '-y', '-o'+path,
             (member.filename if isinstance(member, Member) else member)],
             stdout=PIPE)
         retcode = p.wait()
         if retcode:
             raise CalledProcessError(
-                retcode, self.__command__, output=p.stdout.read())
+                retcode, self._command, output=p.stdout.read())
 
     def extractall(self, path, members=[]):
-        p = Popen(self.__command__ +
+        p = Popen(self._command +
             ['x', self.fileobj.name, '-y', '-o'+path] +
             [(m.filename if isinstance(m, Member) else m) for m in members],
             stdout=PIPE)
         retcode = p.wait()
         if retcode:
             raise CalledProcessError(
-                retcode, self.__command__, output=p.stdout.read())
+                retcode, self._command, output=p.stdout.read())

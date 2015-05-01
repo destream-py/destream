@@ -164,10 +164,10 @@ class ExternalPipe(Archive, threading.Thread):
     def __init__(self, name, stdin):
         assert type(self) is not ExternalPipe, \
             "This class can not be used in standalone"
-        assert hasattr(self, '__command__'), \
-            "__command__ attribute is missing in class %s" % type(self)
+        assert hasattr(self, '_command'), \
+            "_command attribute is missing in class %s" % type(self)
         threading.Thread.__init__(self)
-        self.p = Popen(self.__command__, stdout=PIPE, stdin=PIPE, stderr=PIPE)
+        self.p = Popen(self._command, stdout=PIPE, stdin=PIPE, stderr=PIPE)
         Archive.__init__(self, name, fileobj=self.p.stdout, source=stdin)
         self.start()
 
@@ -175,9 +175,9 @@ class ExternalPipe(Archive, threading.Thread):
     def _check_availability(cls):
         assert cls is not ExternalPipe, \
             "This class can not be used in standalone"
-        assert hasattr(cls, '__command__'), \
-            "__command__ attribute is missing in class %s" % cls
-        commands = [cls.__command__[0]]
+        assert hasattr(cls, '_command'), \
+            "_command attribute is missing in class %s" % cls
+        commands = [cls._command[0]]
         if hasattr(cls, '__fallbackcommands__'):
             commands += cls.__fallbackcommands__
         existing_commands = filter(None, map(find_executable, commands))
@@ -187,7 +187,7 @@ class ExternalPipe(Archive, threading.Thread):
             else:
                 raise OSError(2, commands[0],
                     "cannot find executable between: " + ", ".join(commands))
-        cls.__command__[0] = existing_commands[0]
+        cls._command[0] = existing_commands[0]
 
     def run(self):
         try:
