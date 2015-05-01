@@ -1,9 +1,10 @@
 import magic
 
-from StreamDecompressor.archive import ArchiveFile, ArchivePack
-from StreamDecompressor.decompressors import builtin_decompressors
+from StreamDecompressor import ArchiveFile, ArchivePack, builtin_decompressors
 
-__all__ = ['Guesser', 'open']
+__all__ = """
+          Guesser open
+          """.split()
 
 
 class Guesser(object):
