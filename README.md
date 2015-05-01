@@ -1,10 +1,36 @@
-Python's destream
-=================
+destream
+========
 
 _destream: decompress a stream_
 
-Synopsis
---------
+Installation
+------------
+
+```pip install destream``` *OR* ```easy_install --user destream```
+
+Usage
+-----
+
+1.  Decompress multiple files of anytype to directory:
+
+    ```bash
+    destream -o /tmp/output_dir file1.zip file2.rar file3.7z file4.tar.bz2
+    ```
+2.  Decompress any stream to the current folder:
+
+    ```bash
+    wget -O - "https://github.com/cecton/destream/archive/3.1.tar.gz" | destream -o ./
+    ```
+3.  Decompress any compressed file to stdout:
+
+    ```bash
+    destream documentation.gz | less
+    ```
+
+
+
+Lib Usage
+---------
 
 1.  Open an archive that holds multiple files (aka: ArchivePack)
     ```python
