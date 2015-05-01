@@ -35,3 +35,26 @@ Synopsis
     else:
         archive.extractall('/tmp/some/path/')
     ```
+
+Troubleshooting
+---------------
+
+*   ```ImportError: failed to find libmagic.  Check your installation```
+
+    *   Mac OS X: follow these
+        [installation guide](http://www.brambraakman.com/blog/comments/installing_libmagic_in_mac_os_x_for_python-magic/). Or simply:
+
+        ```
+        brew install libmagic
+        ```
+
+    *   Arch Linux:
+
+        ```
+        pacman -S file
+        ```
+    *   Ubuntu/Debian:
+
+        ```
+        apt-get install libmagic1
+        ```
