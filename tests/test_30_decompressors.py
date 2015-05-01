@@ -15,7 +15,9 @@ class GuesserTest(unittest2.TestCase):
             decompressed_fileobj, expected_name=None):
         try:
             decompressor._check_availability()
-        except:
+        except AttributeError:
+            raise
+        except Exception:
             self.skipTest("decompressor not available")
         if expected_name is None:
             expected_name = decompressed_fileobj.name
