@@ -57,7 +57,7 @@ class FileMember(io.IOBase, tarlib.ExFileObject):
 
 class Untar(ArchivePack):
     __mimes__ = ['application/x-tar']
-    __extensions__ = ['tar']
+    _extensions = ['tar']
     __compression = 'tar'
     _compression = 'tar'
 

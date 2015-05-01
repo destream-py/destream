@@ -57,7 +57,7 @@ class GuesserTest(unittest2.TestCase):
                 # realname
                 self.assertEqual(
                     archive.realname + '.'
-                        + decompressor.__extensions__[0],
+                        + decompressor._extensions[0],
                     archive.source.realname,
                     "expected archive name does not match")
 

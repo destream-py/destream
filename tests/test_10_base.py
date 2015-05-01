@@ -14,7 +14,7 @@ warnings.filterwarnings(
 
 
 class BaseNameTest(Archive):
-    __extensions__ = ['ext1', 'ext2']
+    _extensions = ['ext1', 'ext2']
     __mimes__ = ['mime1', 'mime2']
 
 

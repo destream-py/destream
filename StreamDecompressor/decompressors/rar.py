@@ -47,7 +47,7 @@ class Member(object):
 
 class Unrar(ArchivePack):
     __mimes__ = ['application/x-rar']
-    __extensions__ = ['rar']
+    _extensions = ['rar']
     __command__ = ['rar']
     __compression = 'rar'
     _compression = 'rar'

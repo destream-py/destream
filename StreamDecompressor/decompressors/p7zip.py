@@ -52,7 +52,7 @@ class Member(object):
 
 class Un7z(ArchivePack):
     __mimes__ = ['application/x-7z-compressed']
-    __extensions__ = ['7z']
+    _extensions = ['7z']
     __command__ = ['7zr']
     __compression = '7z'
     _compression = '7z'
