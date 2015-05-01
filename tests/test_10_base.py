@@ -84,14 +84,9 @@ class ArchiveFileTest(unittest2.TestCase):
 
 class CatsEye(ExternalPipe):
     _command = ['cat']
+    _compression = 'cat'
+    _unique_instance = True
     __priority__ = 10
-
-    @classmethod
-    def _guess(cls, mime, name, archive):
-        if cls in archive._decompressors:
-            raise ValueError("oh no, not again!")
-        print "don't skip"
-        return name
 
 
 class ExternalPipeTest(unittest2.TestCase):
@@ -106,7 +101,13 @@ class ExternalPipeTest(unittest2.TestCase):
         filename = '<pipe_test>'
         fileobj = BytesIO(text)
         pipe = CatsEye(filename, fileobj)
-        self.assertEqual(pipe.compressions, [])
+        try:
+            CatsEye._guess('', filename, pipe)
+        except ValueError:
+            pass
+        else:
+            self.fail("CatsEye is _unique_instance = True")
+        self.assertEqual(pipe.compressions, ['cat'])
         self.assertEqual(pipe._decompressors, [CatsEye])
         self._regular_tests(pipe, filename, text)
 
