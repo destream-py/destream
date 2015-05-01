@@ -1,6 +1,6 @@
 import magic
 
-from StreamDecompressor import ArchiveFile, ArchivePack, builtin_decompressors
+from destream import ArchiveFile, ArchivePack, builtin_decompressors
 
 __all__ = """
           Guesser open

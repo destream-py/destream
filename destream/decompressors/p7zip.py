@@ -3,7 +3,7 @@ import binascii
 import re
 from subprocess import check_output, Popen, PIPE, CalledProcessError
 
-from StreamDecompressor import ArchivePack, ArchiveTemp, ExternalPipe
+from destream import ArchivePack, ArchiveTemp, ExternalPipe
 
 __all__ = ['Un7z']
 

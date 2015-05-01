@@ -2,7 +2,7 @@ import zipfile
 import io
 import sys
 
-from StreamDecompressor import ArchivePack, make_seekable, ArchiveFile
+from destream import ArchivePack, make_seekable, ArchiveFile
 
 __all__ = ['Unzip']
 

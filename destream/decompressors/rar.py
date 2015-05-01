@@ -4,7 +4,7 @@ import re
 from subprocess import check_output, Popen, PIPE, CalledProcessError
 from distutils.version import LooseVersion as Version
 
-from StreamDecompressor import ArchivePack, ArchiveTemp, ExternalPipe
+from destream import ArchivePack, ArchiveTemp, ExternalPipe
 
 __all__ = ['Unrar']
 

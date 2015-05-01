@@ -1,4 +1,4 @@
-from StreamDecompressor import ExternalPipe
+from destream import ExternalPipe
 
 __all__ = ['Bunzip2']
 

@@ -1,0 +1,60 @@
+#!/usr/bin/env python2
+
+import sys
+import errno
+import argparse
+import destream
+
+from os.path import join as join_path, basename, isdir
+from shutil import copyfileobj
+
+
+def extract_stream(stdin, stdout=sys.stdout, output_dir=None):
+    with destream.open(fileobj=stdin) as in_:
+        if isinstance(in_, destream.ArchivePack):
+            if output_dir is None:
+                for member in in_.members():
+                    with in_.open(member) as fh_member:
+                        copyfileobj(fh_member, stdout)
+            else:
+                in_.extractall(output_dir)
+        else:
+            if output_dir is None:
+                copyfileobj(in_, stdout)
+            else:
+                with open(join_path(output_dir, basename(in_.realname)), 'w') \
+                        as out:
+                    copyfileobj(in_, out)
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--output", "-o",
+                    help="File or directory for output")
+parser.add_argument("files", nargs='*', type=argparse.FileType('r'),
+                    help="List of files to extract.")
+
+def run(args):
+    if not args.output:
+        stdout, output_dir = sys.stdout, None
+    elif isdir(args.output):
+        stdout, output_dir = None, args.output
+    else:
+        stdout, output_dir = open(args.output, 'w'), None
+    if args.files:
+        for file_ in args.files:
+            extract_stream(file_, stdout=stdout, output_dir=output_dir)
+    else:
+        extract_stream(sys.stdin, stdout=stdout, output_dir=output_dir)
+
+if __name__ == '__main__':
+    args = parser.parse_args()
+    try:
+        run(args)
+    except KeyboardInterrupt:
+        sys.stderr.write("KeyboardInterrupt\n")
+        sys.exit(1)
+    except IOError, exc:
+        if exc.errno == errno.EPIPE:
+            sys.stderr.write("Broken pipe\n")
+            sys.exit(1)
+        else:
+            raise

@@ -8,7 +8,7 @@ from subprocess import Popen, PIPE
 from threading import Thread
 from distutils.spawn import find_executable
 
-from StreamDecompressor import Archive
+from destream import Archive
 
 __all__ = """
           ArchiveFile ArchiveTemp ExternalPipe make_seekable

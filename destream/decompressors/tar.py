@@ -2,7 +2,7 @@ import tarfile as tarlib
 import io
 from os import SEEK_SET
 
-from StreamDecompressor import ArchivePack, make_seekable
+from destream import ArchivePack, make_seekable
 
 __all__ = ['Untar']
 

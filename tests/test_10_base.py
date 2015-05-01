@@ -3,7 +3,7 @@ from io import BytesIO
 import unittest2
 import warnings
 
-from StreamDecompressor import Archive, ArchiveFile, ArchiveTemp, ExternalPipe
+from destream import Archive, ArchiveFile, ArchiveTemp, ExternalPipe
 
 warnings.filterwarnings(
     'ignore',

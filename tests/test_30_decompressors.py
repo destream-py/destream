@@ -7,7 +7,7 @@ import tarfile
 import zipfile
 import unittest2
 
-import StreamDecompressor
+import destream
 
 
 class GuesserTest(unittest2.TestCase):
@@ -21,7 +21,7 @@ class GuesserTest(unittest2.TestCase):
             self.skipTest("decompressor not available")
         if expected_name is None:
             expected_name = decompressed_fileobj.name
-        with StreamDecompressor.open(
+        with destream.open(
                 fileobj=compressed_fileobj, closefd=False) as archive:
             # check that the decompressor has been used
             self.assertIn(
@@ -38,13 +38,13 @@ class GuesserTest(unittest2.TestCase):
                 self.assertEqual(archive.tell(), 0,
                     "the archive cursor should be on position 0")
             # check that the realname with extension match the source realname
-            if not isinstance(archive, StreamDecompressor.ArchivePack) \
+            if not isinstance(archive, destream.ArchivePack) \
                or archive.single():
                 self.assertEqual(archive.read(), decompressed_fileobj.read(),
                     "content does not match")
                 # check that the realname of archive is the same than the
                 # single file member
-                if isinstance(archive, StreamDecompressor.ArchivePack):
+                if isinstance(archive, destream.ArchivePack):
                     filename = getattr(archive.members()[0], 'filename',
                         getattr(archive.members()[0], 'name', None))
                     self.assertEqual(
@@ -126,7 +126,7 @@ class GuesserTest(unittest2.TestCase):
     def test_10_plain_text(self):
         fileobj = BytesIO("Hello World\n")
         fileobj.name = "test_file.txt"
-        guessed = StreamDecompressor.open(fileobj=fileobj)
+        guessed = destream.open(fileobj=fileobj)
         self.assertEqual(guessed.compressions, [],
             "should not have compressions")
         fileobj.seek(0)
@@ -143,7 +143,7 @@ class GuesserTest(unittest2.TestCase):
             '\xff\xff\x0b8\x00\x00')
         raw.name = "test_file.lzma"
         self._check_decompressor(
-            StreamDecompressor.decompressors.Unlzma,
+            destream.decompressors.Unlzma,
             raw, uncompressed)
 
     def test_20_external_pipe_gzip(self):
@@ -167,7 +167,7 @@ class GuesserTest(unittest2.TestCase):
             raw.seek(0)
             raw.name = "test_file" + ext
             self._check_decompressor(
-                StreamDecompressor.decompressors.Gunzip,
+                destream.decompressors.Gunzip,
                 raw, uncompressed, expected_name)
 
     def test_30_tar_single_file(self):
@@ -185,7 +185,7 @@ class GuesserTest(unittest2.TestCase):
             tar.close()
         raw.seek(0)
         self._check_decompressor(
-            StreamDecompressor.decompressors.Untar,
+            destream.decompressors.Untar,
             raw, uncompressed)
 
     def test_40_tar_multiple_files(self):
@@ -204,7 +204,7 @@ class GuesserTest(unittest2.TestCase):
             tar.close()
         raw.seek(0)
         self._check_decompressor(
-            StreamDecompressor.decompressors.Untar,
+            destream.decompressors.Untar,
             raw, uncompressed)
 
     def test_20_external_pipe_xz(self):
@@ -216,7 +216,7 @@ class GuesserTest(unittest2.TestCase):
             '$\x0c\xa6\x18\xd8\xd8\x1f\xb6\xf3}\x01\x00\x00\x00\x00\x04YZ')
         raw.name = "test_file.xz"
         self._check_decompressor(
-            StreamDecompressor.decompressors.Unxz,
+            destream.decompressors.Unxz,
             raw, uncompressed)
 
     def test_30_7z_single_file(self):
@@ -231,7 +231,7 @@ class GuesserTest(unittest2.TestCase):
             "\x00\x05\x01\x14\n\x01\x00\xc0\x8dZ!\xf62\xcf\x01\x15\x06"
             "\x01\x00\x00\x00\x00\x00\x00\x00")
         self._check_decompressor(
-            StreamDecompressor.decompressors.Un7z,
+            destream.decompressors.Un7z,
             raw, uncompressed)
         uncompressed = BytesIO("Hello World\n")
         uncompressed.name = 'a'
@@ -245,7 +245,7 @@ class GuesserTest(unittest2.TestCase):
             "\xf62\xcf\x01\x15\x06\x01\x00 \x80\xa4\x81\x00\x00")
         raw.name = "test_file.7z"
         self._check_decompressor(
-            StreamDecompressor.decompressors.Un7z,
+            destream.decompressors.Un7z,
             raw, uncompressed)
 
     def test_40_7z_multiple_files(self):
@@ -264,7 +264,7 @@ class GuesserTest(unittest2.TestCase):
             'pF\xbb5\x00\x00')
         raw.name = "test_file.7z"
         self._check_decompressor(
-            StreamDecompressor.decompressors.Un7z,
+            destream.decompressors.Un7z,
             raw, uncompressed)
 
     def test_30_zip_single_file(self):
@@ -279,7 +279,7 @@ class GuesserTest(unittest2.TestCase):
             zip.close()
         raw.seek(0)
         self._check_decompressor(
-            StreamDecompressor.decompressors.Unzip,
+            destream.decompressors.Unzip,
             raw, uncompressed)
 
     def test_40_zip_multiple_files(self):
@@ -295,7 +295,7 @@ class GuesserTest(unittest2.TestCase):
             zip.close()
         raw.seek(0)
         self._check_decompressor(
-            StreamDecompressor.decompressors.Unzip,
+            destream.decompressors.Unzip,
             raw, uncompressed)
 
     def test_20_external_pipe_bzip2(self):
@@ -315,7 +315,7 @@ class GuesserTest(unittest2.TestCase):
             raw.seek(0)
             raw.name = "test_file" + ext
             self._check_decompressor(
-                StreamDecompressor.decompressors.Bunzip2,
+                destream.decompressors.Bunzip2,
                 raw, uncompressed, expected_name)
 
     def test_30_rar_single_file(self):
@@ -329,7 +329,7 @@ class GuesserTest(unittest2.TestCase):
             "\x05z\x99\xd5\x10\xc4={\x00@\x07\x00")
         raw.name = "test_file.rar"
         self._check_decompressor(
-            StreamDecompressor.decompressors.Unrar,
+            destream.decompressors.Unrar,
             raw, uncompressed)
 
     def test_40_rar_multiple_files(self):
@@ -349,5 +349,5 @@ class GuesserTest(unittest2.TestCase):
             "\x00=T\\D\x140\x01\x00\xedA\x00\x00c\x00\xc0\xc4={\x00@\x07\x00")
         raw.name = "test_file.rar"
         self._check_decompressor(
-            StreamDecompressor.decompressors.Unrar,
+            destream.decompressors.Unrar,
             raw, uncompressed)
