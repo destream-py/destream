@@ -5,6 +5,7 @@ import errno
 import argparse
 import destream
 
+from os import isatty
 from os.path import join as join_path, basename, isdir
 from shutil import copyfileobj
 
@@ -27,6 +28,8 @@ def extract_stream(stdin, stdout=sys.stdout, output_dir=None):
                     copyfileobj(in_, out)
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--force", "-f", action='store_true',
+                    help="Decompress input file even if the input is a tty")
 parser.add_argument("--output", "-o",
                     help="File or directory for output")
 parser.add_argument("files", nargs='*', type=argparse.FileType('r'),
@@ -43,6 +46,10 @@ def run(args):
         for file_ in args.files:
             extract_stream(file_, stdout=stdout, output_dir=output_dir)
     else:
+        if not args.force and isatty(sys.stdin.fileno()):
+            sys.stderr.write("%s: compressed data not read from a terminal. "
+                             "Use -f to force decompression.\n" % sys.argv[0])
+            sys.exit(1)
         extract_stream(sys.stdin, stdout=stdout, output_dir=output_dir)
 
 if __name__ == '__main__':
