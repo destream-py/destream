@@ -15,7 +15,7 @@ __all__ = """\
     """.split()
 
 
-re_extension = re.compile('^(.*?)(\.([^.]+))?$')
+RE_EXTENSION = re.compile('^(.*?)(\.([^.]+))?$')
 
 class Archive(io.BufferedReader):
     """
@@ -60,7 +60,7 @@ class Archive(io.BufferedReader):
                 raise ValueError("class %s already in the decompressor list")
         realname = name
         if hasattr(cls, '__mimes__'):
-            match = re_extension.search(name)
+            match = RE_EXTENSION.search(name)
             if hasattr(cls, '__extensions__') and \
                match.group(2) and \
                os.path.normcase(match.group(3)) in cls.__extensions__:
