@@ -24,7 +24,7 @@ class GuesserTest(unittest2.TestCase):
             # check that the decompressor has been used
             self.assertIn(
                 decompressor,
-                archive.__decompressors__,
+                archive._decompressors,
                 "the decompressor didn't applied")
             # check that the cursor is at the beginning of the file
             # (not available for streams)

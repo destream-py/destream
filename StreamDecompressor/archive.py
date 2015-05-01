@@ -41,10 +41,10 @@ class Archive(io.BufferedReader):
         self.source = source
         self.closefd = closefd
         if isinstance(source, Archive):
-            self.__decompressors__ = source.__decompressors__ + [type(self)]
+            self._decompressors = source._decompressors + [type(self)]
             self.compressions = list(source.compressions)
         else:
-            self.__decompressors__ = [type(self)]
+            self._decompressors = [type(self)]
             self.compressions = []
         if hasattr(self, '_compression'):
             self.compressions += [self._compression]
@@ -56,7 +56,7 @@ class Archive(io.BufferedReader):
     @classmethod
     def __guess__(cls, mime, name, fileobj):
         if getattr(cls, '__uniqueinstance__', False):
-            if cls in fileobj.__decompressors__:
+            if cls in fileobj._decompressors:
                 raise ValueError("class %s already in the decompressor list")
         realname = name
         if hasattr(cls, '__mimes__'):
