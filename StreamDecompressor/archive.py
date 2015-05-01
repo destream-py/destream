@@ -72,7 +72,7 @@ class Archive(io.BufferedReader):
         return realname
 
     def close(self):
-        if self.closefd:
+        if getattr(self, 'closefd', True):
             super(Archive, self).close()
 
     def __del__(self):
