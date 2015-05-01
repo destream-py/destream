@@ -28,6 +28,10 @@ class GuesserTest(unittest2.TestCase):
                 decompressor,
                 archive._decompressors,
                 "the decompressor didn't applied")
+            self.assertIn(
+                decompressor._compression,
+                (x.split(':')[0] for x in archive.compressions),
+                "archive's compressions is bad")
             # check that the cursor is at the beginning of the file
             # (not available for streams)
             if archive.seekable():
