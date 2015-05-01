@@ -58,7 +58,8 @@ class FileMember(io.IOBase, tarlib.ExFileObject):
 class Untar(ArchivePack):
     __mimes__ = ['application/x-tar']
     __extensions__ = ['tar']
-    __compression__ = 'tar'
+    __compression = 'tar'
+    _compression = 'tar'
 
     def __init__(self, name, fileobj):
         source = make_seekable(fileobj)
@@ -70,7 +71,7 @@ class Untar(ArchivePack):
         if self._single:
             stream = FileMember(self.tarfile, first_member)
             stream_name = first_member.name
-            self.__compression__ += ':' + stream_name
+            self._compression += ':' + stream_name
         else:
             stream_name = name
             stream = source

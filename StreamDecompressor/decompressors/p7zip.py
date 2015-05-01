@@ -54,7 +54,8 @@ class Un7z(ArchivePack):
     __mimes__ = ['application/x-7z-compressed']
     __extensions__ = ['7z']
     __command__ = ['7zr']
-    __compression__ = '7z'
+    __compression = '7z'
+    _compression = '7z'
 
     @classmethod
     def __checkavailability__(cls):
@@ -72,7 +73,7 @@ class Un7z(ArchivePack):
         if self._stream:
             stream = self.open(self._members[0])
             stream_name = self._members[0].filename
-            self.__compression__ += ':' + stream_name
+            self._compression += ':' + stream_name
         else:
             stream_name = name
             stream = self.fileobj

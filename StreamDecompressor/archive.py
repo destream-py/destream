@@ -46,8 +46,8 @@ class Archive(io.BufferedReader):
         else:
             self.__decompressors__ = [type(self)]
             self.compressions = []
-        if hasattr(self, '__compression__'):
-            self.compressions += [self.__compression__]
+        if hasattr(self, '_compression'):
+            self.compressions += [self._compression]
 
     @classmethod
     def __checkavailability__(self):

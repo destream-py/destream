@@ -10,7 +10,8 @@ class Gunzip(ExternalPipe):
     ]
     __extensions__ = ['gz']
     __command__ = ['gunzip']
-    __compression__ = 'gzip'
+    __compression = 'gzip'
+    _compression = 'gzip'
 
     @classmethod
     def __guess__(cls, mime, name, fileobj):

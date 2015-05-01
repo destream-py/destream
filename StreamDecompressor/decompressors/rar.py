@@ -49,7 +49,8 @@ class Unrar(ArchivePack):
     __mimes__ = ['application/x-rar']
     __extensions__ = ['rar']
     __command__ = ['rar']
-    __compression__ = 'rar'
+    __compression = 'rar'
+    _compression = 'rar'
     # NOTE:
     #   https://en.wikipedia.org/wiki/Unrar
     #   Unrar is the name of two different programs, we should prefer rar by
@@ -80,7 +81,7 @@ class Unrar(ArchivePack):
         if self._stream:
             stream = self.open(self._members[0])
             stream_name = self._members[0].filename
-            self.__compression__ += ':' + stream_name
+            self._compression += ':' + stream_name
         else:
             stream_name = name
             stream = self.fileobj

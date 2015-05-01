@@ -7,7 +7,7 @@ class Bunzip2(ExternalPipe):
     __mimes__ = ['application/x-bzip2']
     __extensions__ = ['bz2', 'bz', 'tbz2', 'tbz']
     __command__ = ['bunzip2']
-    __compression__ = 'bzip2'
+    _compression = 'bzip2'
 
     @classmethod
     def __guess__(cls, mime, name, fileobj):

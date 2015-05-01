@@ -7,4 +7,5 @@ class Unlzma(ExternalPipe):
     __mimes__ = ['application/x-lzma']
     __extensions__ = ['lzma']
     __command__ = 'unlzma -c'.split()
-    __compression__ = 'lzma'
+    __compression = 'lzma'
+    _compression = 'lzma'
