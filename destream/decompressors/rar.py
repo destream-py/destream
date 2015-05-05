@@ -49,7 +49,6 @@ class Unrar(ArchivePack):
     _mimes = ['application/x-rar']
     _extensions = ['rar']
     _command = ['rar']
-    __compression = 'rar'
     _compression = 'rar'
     # NOTE:
     #   https://en.wikipedia.org/wiki/Unrar

@@ -10,7 +10,6 @@ class Gunzip(ExternalPipe):
     ]
     _extensions = ['gz']
     _command = ['gunzip']
-    __compression = 'gzip'
     _compression = 'gzip'
 
     @classmethod

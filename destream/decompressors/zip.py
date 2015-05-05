@@ -10,7 +10,6 @@ __all__ = ['Unzip']
 class Unzip(ArchivePack):
     _mimes = ['application/zip']
     _extensions = ['zip']
-    __compression = 'zip'
     _compression = 'zip'
 
     def __init__(self, name, fileobj):

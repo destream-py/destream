@@ -54,7 +54,6 @@ class Un7z(ArchivePack):
     _mimes = ['application/x-7z-compressed']
     _extensions = ['7z']
     _command = ['7zr']
-    __compression = '7z'
     _compression = '7z'
 
     @classmethod
