@@ -35,7 +35,7 @@ parser.add_argument("--force", "-f", action='store_true',
                     help="Decompress input file even if the input is a tty")
 parser.add_argument("--output", "-o",
                     help="File or directory for output")
-parser.add_argument("files", nargs='*', type=argparse.FileType('r'),
+parser.add_argument("files", nargs='*', type=argparse.FileType('rb'),
                     help="List of files to extract.")
 
 def run(args):
