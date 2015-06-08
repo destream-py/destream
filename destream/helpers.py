@@ -128,3 +128,4 @@ class ExternalPipe(Archive, Thread):
             else:
                 raise
         self.join()
+        self.p.stderr.close()
