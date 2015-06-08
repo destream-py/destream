@@ -120,5 +120,11 @@ class ExternalPipe(Archive, Thread):
     def close(self):
         super(ExternalPipe, self).close()
         if self.p.poll() is None:
-            self.p.terminate()
+            try:
+                self.p.terminate()
+            except OSError as exc:
+                if exc.errno == errno.ESRCH:
+                    pass
+                else:
+                    raise
             self.join()
