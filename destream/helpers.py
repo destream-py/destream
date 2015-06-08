@@ -1,5 +1,6 @@
 import os
 import io
+import sys
 import errno
 import tempfile
 
@@ -39,7 +40,7 @@ class ArchiveTemp(Archive):
         else:
             name = fileobj.name
         tempdir = \
-            (os.path.dirname(name) if isinstance(name, basestring) else None)
+            (os.path.dirname(name) if isinstance(name, str) else None)
         try:
             self.tempfile = tempfile.NamedTemporaryFile(dir=tempdir)
         except OSError:
@@ -58,7 +59,7 @@ def make_seekable(fileobj):
     If the file-object is not seekable, return  ArchiveTemp of the fileobject,
     otherwise return the file-object itself
     """
-    if isinstance(fileobj, file):
+    if sys.version_info < (3, 0) and isinstance(fileobj, file):
         filename = fileobj.name
         fileobj = io.FileIO(fileobj.fileno(), closefd=False)
         fileobj.name = filename
@@ -92,7 +93,7 @@ class ExternalPipe(Archive, Thread):
         commands = [cls._command[0]]
         if hasattr(cls, '__fallbackcommands__'):
             commands += cls.__fallbackcommands__
-        existing_commands = filter(None, map(find_executable, commands))
+        existing_commands = [x for x in map(find_executable, commands) if x]
         if not existing_commands:
             if len(commands) == 1:
                 raise OSError(2, commands[0], "cannot find executable")
@@ -104,7 +105,7 @@ class ExternalPipe(Archive, Thread):
     def run(self):
         try:
             copyfileobj(self.source, self.p.stdin)
-        except IOError, exc:
+        except IOError as exc:
             # NOTE: regular exception when we close the pipe, just hide it
             if exc.errno == errno.EPIPE:
                 pass
@@ -119,12 +120,11 @@ class ExternalPipe(Archive, Thread):
 
     def close(self):
         super(ExternalPipe, self).close()
-        if self.p.poll() is None:
-            try:
-                self.p.terminate()
-            except OSError as exc:
-                if exc.errno == errno.ESRCH:
-                    pass
-                else:
-                    raise
-            self.join()
+        try:
+            self.p.terminate()
+        except OSError as exc:
+            if exc.errno == errno.ESRCH:
+                pass
+            else:
+                raise
+        self.join()

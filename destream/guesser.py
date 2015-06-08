@@ -17,8 +17,8 @@ class Guesser(object):
         self.limit = limit
 
     def guess(self, archive):
-        mime = magic.from_buffer(archive.peek(1024), mime=True)
-        for _, decompressor in sorted(self.decompressors):
+        mime = magic.from_buffer(archive.peek(1024), mime=True).decode()
+        for _, decompressor in sorted(self.decompressors, key=lambda x: x[0]):
             if isinstance(archive, ArchivePack) and \
                type(archive) is decompressor:
                 continue

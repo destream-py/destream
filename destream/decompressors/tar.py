@@ -1,5 +1,6 @@
 import tarfile as tarlib
 import io
+import sys
 from os import SEEK_SET
 
 from destream import ArchivePack, make_seekable
@@ -69,7 +70,10 @@ class Untar(ArchivePack):
             raise IOError("can not read first member of the tar archive")
         self._single = (self.tarfile.next() is None)
         if self._single:
-            stream = FileMember(self.tarfile, first_member)
+            if sys.version_info < (3, 0):
+                stream = FileMember(self.tarfile, first_member)
+            else:
+                stream = tarlib.ExFileObject(self.tarfile, first_member)
             stream_name = first_member.name
             self._compression += ':' + stream_name
         else:
@@ -88,7 +92,10 @@ class Untar(ArchivePack):
         return members
 
     def open(self, member):
-        return FileMember(self.tarfile, member)
+        if sys.version_info < (3, 0):
+            return FileMember(self.tarfile, member)
+        else:
+            return tarlib.ExFileObject(self.tarfile, member)
 
     def extract(self, member, path):
         return self.tarfile.extract(member, path)

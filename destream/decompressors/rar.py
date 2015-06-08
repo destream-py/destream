@@ -1,6 +1,9 @@
+from __future__ import division
+
 import struct
 import binascii
 import re
+from functools import reduce
 from subprocess import check_output, Popen, PIPE, CalledProcessError
 from distutils.version import LooseVersion as Version
 
@@ -34,7 +37,7 @@ class Member(object):
         info['filename'] = info.pop('name')
         info['size'] = int(info.get('size', 0))
         info['packed_size'] = int(info.get('packed_size', 0))
-        info['ratio'] = float(info.get('ratio', '0%')[:-1]) / 100.0
+        info['ratio'] = float(info.get('ratio', '0%')[:-1]) / 100
         info['crc32'] = reduce(lambda x, y: x * 256 + y, \
             struct.unpack('BBBB', binascii.unhexlify(info['crc32'])), 0)
         self.__dict__.update(info)
@@ -59,8 +62,8 @@ class Unrar(ArchivePack):
 
     @classmethod
     def _check_availability(cls):
-        ExternalPipe._check_availability.im_func(cls)
-        output = check_output(cls._command)
+        ExternalPipe._check_availability.__func__(cls)
+        output = check_output(cls._command).decode()
         matches = re.search("(?:UN)?RAR (\d+\.\d+)", output)
         assert matches, "%s: can not determine version" \
                         % cls._command[0]
@@ -71,10 +74,11 @@ class Unrar(ArchivePack):
 
     def __init__(self, name, fileobj):
         self.fileobj = ArchiveTemp(fileobj)
-        output = check_output(self._command + ['vta', self.fileobj.name])
+        output = check_output(self._command +
+                              ['vta', self.fileobj.name]).decode()
         hunks = iter(output.split("\n\n"))
-        self.information = hunks.next().strip()
-        self.header = Header(hunks.next())
+        self.information = next(hunks).strip()
+        self.header = Header(next(hunks))
         self._members = [m for m in (Member(h) for h in hunks)]
         self._stream = (len(self._members) == 1)
         if self._stream:

@@ -1,6 +1,7 @@
 import struct
 import binascii
 import re
+from functools import reduce
 from subprocess import check_output, Popen, PIPE, CalledProcessError
 
 from destream import ArchivePack, ArchiveTemp, ExternalPipe
@@ -58,12 +59,12 @@ class Un7z(ArchivePack):
 
     @classmethod
     def _check_availability(cls):
-        return ExternalPipe._check_availability.im_func(cls)
+        return ExternalPipe._check_availability.__func__(cls)
 
     def __init__(self, name, fileobj):
         self.fileobj = ArchiveTemp(fileobj)
         info = check_output(self._command +
-                            ['l', self.fileobj.name, '-slt'])
+                            ['l', self.fileobj.name, '-slt']).decode()
         self.header = Header(ereg_header.search(info).group(1))
         self._members = [Member(m.group(1)) \
                         for m in ereg_member.finditer(info,

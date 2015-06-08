@@ -1,6 +1,7 @@
 import re
 import os
 import io
+import sys
 
 __all__ = """
           Archive ArchivePack
@@ -19,7 +20,7 @@ class Archive(io.BufferedReader):
             "This class can not be used in standalone"
         if not fileobj:
             fileobj = io.BytesIO()
-        elif isinstance(fileobj, file):
+        elif sys.version_info < (3, 0) and isinstance(fileobj, file):
             filename = fileobj.name
             fileobj = io.FileIO(fileobj.fileno(), closefd=False)
             fileobj.name = filename
