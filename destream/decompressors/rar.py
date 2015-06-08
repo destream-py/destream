@@ -103,11 +103,15 @@ class Unrar(ArchivePack):
             self._p = p
             return p.stdout
         else:
-            temp = ArchiveTemp(p.stdout)
-            retcode = p.wait()
-            if retcode:
-                raise CalledProcessError(
-                    retcode, self._command, output=p.stderr.read())
+            try:
+                temp = ArchiveTemp(p.stdout)
+                retcode = p.wait()
+                if retcode:
+                    raise CalledProcessError(
+                        retcode, self._command, output=p.stderr.read())
+            finally:
+                p.stdout.close()
+                p.stderr.close()
             return temp
 
     @property
@@ -121,6 +125,7 @@ class Unrar(ArchivePack):
         if self._stream:
             if not self.closed:
                 self._p.stdout.close()
+                self._p.stderr.close()
                 self._p.wait()
         else:
             self.fileobj.close()
@@ -130,17 +135,23 @@ class Unrar(ArchivePack):
             ['x', self.fileobj.name,
              (member.filename if isinstance(member, Member) else member),
              path], stdout=PIPE)
-        retcode = p.wait()
-        if retcode:
-            raise CalledProcessError(
-                retcode, self._command, output=p.stdout.read())
+        try:
+            retcode = p.wait()
+            if retcode:
+                raise CalledProcessError(
+                    retcode, self._command, output=p.stdout.read())
+        finally:
+            p.stdout.close()
 
     def extractall(self, path, members=[]):
         p = Popen(self._command +
             ['x', self.fileobj.name] +
             [(m.filename if isinstance(m, Member) else m) for m in members] +
             [path], stdout=PIPE)
-        retcode = p.wait()
-        if retcode:
-            raise CalledProcessError(
-                retcode, self._command, output=p.stdout.read())
+        try:
+            retcode = p.wait()
+            if retcode:
+                raise CalledProcessError(
+                    retcode, self._command, output=p.stdout.read())
+        finally:
+            p.stdout.close()
