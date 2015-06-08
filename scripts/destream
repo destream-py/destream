@@ -23,8 +23,11 @@ def extract_stream(stdin, stdout=sys.stdout, output_dir=None):
             if output_dir is None:
                 copyfileobj(in_, stdout)
             else:
-                with open(join_path(output_dir, basename(in_.realname)), 'w') \
-                        as out:
+                if stdin is sys.stdin:
+                    filename = "stdout"
+                else:
+                    filename = basename(in_.realname)
+                with open(join_path(output_dir, filename), 'w') as out:
                     copyfileobj(in_, out)
 
 parser = argparse.ArgumentParser()
