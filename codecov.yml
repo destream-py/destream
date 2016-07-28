@@ -1,0 +1,3 @@
+coverage:
+  ignore:
+    - destream/decompressors/rar.py
