@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = "destream",
-    version = "4.0",
+    version = "4.0.1",
     author = "Cecile Tonglet",
     author_email = "cecile.tonglet@gmail.com",
     description = ("A simple module to decompress streams compressed multiple "
@@ -12,7 +12,7 @@ setup(
     url = "https://github.com/cecton/destream",
     packages = find_packages(),
     scripts = ['scripts/destream'],
-    install_requires = ['python-magic'],
+    install_requires = ['python-magic==0.4.11'],
     classifiers = [
         "Development Status :: 5 - Production/Stable",
         "Topic :: System :: Archiving :: Compression",
