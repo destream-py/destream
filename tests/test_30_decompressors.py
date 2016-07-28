@@ -29,8 +29,7 @@ class GuesserTest(unittest.TestCase):
             # check that the decompressor has been used
             self.assertIn(
                 decompressor,
-                archive._decompressors,
-                "the decompressor didn't applied")
+                archive._decompressors, "the decompressor didn't apply")
             self.assertIn(
                 decompressor._compression,
                 (x.split(':')[0] for x in archive.compressions),
