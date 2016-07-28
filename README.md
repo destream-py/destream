@@ -87,3 +87,8 @@ Troubleshooting
         ```
         apt-get install libmagic1
         ```
+
+*   LZMA does not work
+
+    Check your version of file and libmagic. It's working on version 5.22 and
+    greater but not on version 5.14 and lower.
