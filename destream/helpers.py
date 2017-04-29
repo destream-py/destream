@@ -70,7 +70,27 @@ def make_seekable(fileobj):
         else ArchiveTemp(fileobj)
 
 
-class ExternalPipe(Archive, Thread):
+class _ExternalPipeWriter(Thread):
+    def __init__(self, r, w):
+        super(_ExternalPipeWriter, self).__init__()
+        self.daemon = True
+        self.r = r
+        self.w = w
+
+    def run(self):
+        try:
+            copyfileobj(self.r, self.w)
+        except IOError as exc:
+            # NOTE: regular exception when we close the pipe, just hide it
+            if exc.errno == errno.EPIPE:
+                pass
+            else:
+                raise
+        finally:
+            self.w.close()
+
+
+class ExternalPipe(Archive):
     """
     Pipe a file-object to a command and make an archive of the output
     """
@@ -79,10 +99,11 @@ class ExternalPipe(Archive, Thread):
             "This class can not be used in standalone"
         assert hasattr(self, '_command'), \
             "_command attribute is missing in class %s" % type(self)
-        Thread.__init__(self)
         self.p = Popen(self._command, stdout=PIPE, stdin=PIPE, stderr=PIPE)
-        Archive.__init__(self, name, fileobj=self.p.stdout, source=stdin)
-        self.start()
+        self.t = _ExternalPipeWriter(stdin, self.p.stdin)
+        super(ExternalPipe, self).__init__(name, fileobj=self.p.stdout,
+                                           source=stdin)
+        self.t.start()
 
     @classmethod
     def _check_availability(cls):
@@ -102,18 +123,6 @@ class ExternalPipe(Archive, Thread):
                     "cannot find executable between: " + ", ".join(commands))
         cls._command[0] = existing_commands[0]
 
-    def run(self):
-        try:
-            copyfileobj(self.source, self.p.stdin)
-        except IOError as exc:
-            # NOTE: regular exception when we close the pipe, just hide it
-            if exc.errno == errno.EPIPE:
-                pass
-            else:
-                raise
-        self.p.stdin.close()
-        self.p.wait()
-
     @property
     def closed(self):
         return self.p.stdout.closed
@@ -127,5 +136,4 @@ class ExternalPipe(Archive, Thread):
                 pass
             else:
                 raise
-        self.join()
-        self.p.stderr.close()
+        self.t.join()
