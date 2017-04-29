@@ -8,7 +8,7 @@ python:
 cache: pip
 
 before_install:
-  - sudo apt-get install p7zip
+  - sudo apt-get install p7zip rar
   - sudo sh -c 'echo "deb http://archive.ubuntu.com/ubuntu/ wily main restricted" > /etc/apt/sources.list'
   - sudo apt-get update
   - sudo apt-get install file libmagic1
