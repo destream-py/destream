@@ -1,3 +1,4 @@
+import gzip
 import os
 import tempfile
 import shutil
@@ -353,3 +354,21 @@ class GuesserTest(unittest.TestCase):
         self._check_decompressor(
             destream.decompressors.Unrar,
             raw, uncompressed)
+
+    def test_50_object_closed_on_delete(self):
+        with tempfile.NamedTemporaryFile('w+b') as fh:
+            # NOTE: the file must be big enough
+            with gzip.open(fh.name, 'w+b') as gzipped:
+                for i in range(3000):
+                    gzipped.write(os.urandom(1024))
+            archive = destream.open(fh.name)
+            self.assertIn(
+                destream.decompressors.Gunzip,
+                archive._decompressors)
+            proc = archive.p
+            del archive
+            self.assertIsNotNone(proc.poll())
+            archive2 = destream.open(fh.name)
+            proc2 = archive2.p
+            archive2 = None
+            self.assertIsNotNone(proc2.poll())
