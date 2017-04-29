@@ -366,9 +366,13 @@ class GuesserTest(unittest.TestCase):
                 destream.decompressors.Gunzip,
                 archive._decompressors)
             proc = archive.p
+            thread = archive.t
             del archive
             self.assertIsNotNone(proc.poll())
+            self.assertFalse(thread.is_alive())
             archive2 = destream.open(fh.name)
             proc2 = archive2.p
+            thread2 = archive2.t
             archive2 = None
             self.assertIsNotNone(proc2.poll())
+            self.assertFalse(thread2.is_alive())
