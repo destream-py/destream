@@ -222,6 +222,16 @@ class GuesserTest(unittest.TestCase):
             destream.decompressors.Unxz,
             raw, uncompressed)
 
+    def test_20_external_pipe_zstd(self):
+        uncompressed = BytesIO(b"Hello World\n")
+        uncompressed.name = 'test_file'
+        raw = BytesIO(
+            b'%\xb5/\xfd\x08@\x00\x0cHello World\n\xc0\x00\x00')
+        raw.name = "test_file.zst"
+        self._check_decompressor(
+            destream.decompressors.Unzstd,
+            raw, uncompressed)
+
     def test_30_7z_single_file(self):
         uncompressed = BytesIO(b"Hello World\n")
         uncompressed.name = None

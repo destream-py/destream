@@ -9,6 +9,7 @@ from destream.decompressors.lzma import *
 from destream.decompressors.p7zip import *
 from destream.decompressors.tar import *
 from destream.decompressors.xz import *
+from destream.decompressors.zstd import *
 from destream.decompressors.zip import *
 from destream.decompressors.rar import *
 
