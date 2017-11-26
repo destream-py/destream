@@ -92,3 +92,8 @@ Troubleshooting
 
     Check your version of file and libmagic. It's working on version 5.22 and
     greater but not on version 5.14 and lower.
+
+*   Zstd does not work
+
+    Check your version of file and libmagic. It's working on version 5.32 and
+    greater but not on version 5.25 and lower.

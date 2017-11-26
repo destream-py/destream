@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = "destream",
-    version = "4.1.1",
+    version = "4.2.0",
     author = "Cecile Tonglet",
     author_email = "cecile.tonglet@gmail.com",
     description = ("A simple module to decompress streams compressed multiple "
