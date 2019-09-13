@@ -226,7 +226,7 @@ class GuesserTest(unittest.TestCase):
         uncompressed = BytesIO(b"Hello World\n")
         uncompressed.name = 'test_file'
         raw = BytesIO(
-            b'%\xb5/\xfd\x08@\x00\x0cHello World\n\xc0\x00\x00')
+            b'(\xb5/\xfd$\x0ca\x00\x00Hello World\n\x93C\x0f\x1a')
         raw.name = "test_file.zst"
         self._check_decompressor(
             destream.decompressors.Unzstd,
