@@ -6,6 +6,11 @@ python:
   - "3.6"
   - "3.7"
 
+os:
+  - linux
+  - osx
+  - windows
+
 cache: pip
 
 before_install:
