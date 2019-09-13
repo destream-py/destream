@@ -77,7 +77,7 @@ class Unrar(ArchivePack):
         output = check_output(self._command +
                               ['vta', self.fileobj.name]).decode()
         hunks = iter_on_hunks(output.split("\n\n"))
-        self.information = next(hunks).strip()
+        self.information = next(hunks)
         self.header = Header(next(hunks))
         self._members = [m for m in (Member(h) for h in hunks)]
         self._stream = (len(self._members) == 1)
