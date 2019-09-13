@@ -10,6 +10,8 @@ cache: pip
 
 before_install:
   - sudo apt-get install p7zip rar
+  # NOTE: attempt to get a more updated version of file and libmagic >= 5.30
+  - sudo sh -c 'echo "deb http://archive.ubuntu.com/ubuntu/ bionic main restricted universe" > /etc/apt/sources.list'
   - sudo apt-get update
   - sudo apt-get install zstd
   - sudo apt-get install file libmagic1
