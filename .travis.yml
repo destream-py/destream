@@ -4,12 +4,19 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
+  - "3.7"
+
+os:
+  - linux
+  # - osx         # NOTE: Python is not available yet (not tested)
+  # - windows     # NOTE: Python is not available yet
 
 cache: pip
 
 before_install:
   - sudo apt-get install p7zip rar
-  - sudo sh -c 'echo "deb http://archive.ubuntu.com/ubuntu/ artful main restricted universe" > /etc/apt/sources.list'
+  # NOTE: attempt to get a more updated version of file and libmagic >= 5.30
+  - sudo sh -c 'echo "deb http://archive.ubuntu.com/ubuntu/ bionic main restricted universe" > /etc/apt/sources.list'
   - sudo apt-get update
   - sudo apt-get install zstd
   - sudo apt-get install file libmagic1

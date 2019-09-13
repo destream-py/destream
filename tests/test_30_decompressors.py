@@ -6,6 +6,7 @@ import sys
 from io import BytesIO
 import tarfile
 import zipfile
+import magic
 try:
     import unittest2 as unittest
 except ImportError:
@@ -25,6 +26,10 @@ class GuesserTest(unittest.TestCase):
             self.skipTest("decompressor not available")
         if expected_name is None:
             expected_name = decompressed_fileobj.name
+        archive = destream.ArchiveFile(compressed_fileobj, None, closefd=False)
+        mime = magic.from_buffer(archive.peek(1024), mime=True)
+        decompressor._guess(mime, str(archive.realname), compressed_fileobj)
+        compressed_fileobj.seek(0)
         with destream.open(
                 fileobj=compressed_fileobj, closefd=False) as archive:
             # check that the decompressor has been used
@@ -226,7 +231,7 @@ class GuesserTest(unittest.TestCase):
         uncompressed = BytesIO(b"Hello World\n")
         uncompressed.name = 'test_file'
         raw = BytesIO(
-            b'%\xb5/\xfd\x08@\x00\x0cHello World\n\xc0\x00\x00')
+            b'(\xb5/\xfd$\x0ca\x00\x00Hello World\n\x93C\x0f\x1a')
         raw.name = "test_file.zst"
         self._check_decompressor(
             destream.decompressors.Unzstd,

@@ -12,28 +12,28 @@ from destream import ArchivePack, ArchiveTemp, ExternalPipe
 __all__ = ['Unrar']
 
 
-def parse_hunk(hunk):
-    info = {}
-    for m in re.finditer(
-            r'^[ \t\f]*(.+?)[ \t\f]*:[ \t\f]*(.*?)[ \t\f]*$',
-            hunk, flags=re.M):
-        key = re.sub(r'\W', '_', m.group(1).lower())
-        info[key] = m.group(2)
-    if info.get('service', '') == 'EOF':
-        raise StopIteration()
-    return info
+def iter_on_hunks(hunks):
+    for hunk in hunks:
+        info = {}
+        for m in re.finditer(
+                r'^[ \t\f]*(.+?)[ \t\f]*:[ \t\f]*(.*?)[ \t\f]*$',
+                hunk, flags=re.M):
+            key = re.sub(r'\W', '_', m.group(1).lower())
+            info[key] = m.group(2)
+        if info.get('service', '') == 'EOF':
+            break
+        yield info
 
 
 class Header(object):
-    def __init__(self, hunk):
-        self.__dict__.update(parse_hunk(hunk))
+    def __init__(self, info):
+        self.__dict__.update(info)
         assert 'RAR' in self.details, \
             "Maybe not a RAR file:%s\n" % self.details
 
 
 class Member(object):
-    def __init__(self, hunk):
-        info = parse_hunk(hunk)
+    def __init__(self, info):
         info['filename'] = info.pop('name')
         info['size'] = int(info.get('size', 0))
         info['packed_size'] = int(info.get('packed_size', 0))
@@ -76,8 +76,8 @@ class Unrar(ArchivePack):
         self.fileobj = ArchiveTemp(fileobj)
         output = check_output(self._command +
                               ['vta', self.fileobj.name]).decode()
-        hunks = iter(output.split("\n\n"))
-        self.information = next(hunks).strip()
+        hunks = iter_on_hunks(output.split("\n\n"))
+        self.information = next(hunks)
         self.header = Header(next(hunks))
         self._members = [m for m in (Member(h) for h in hunks)]
         self._stream = (len(self._members) == 1)

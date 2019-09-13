@@ -6,6 +6,15 @@ destream
 
 _destream: decompress a stream_
 
+Compatibility
+-------------
+
+ *  Python: 2.7, 3.4, 3.5, 3.6, 3.7
+ *  OS:
+     -  Linux
+     -  OSX is not tested
+     -  Windows is not tested and requires file and libmagic for Windows
+
 Installation
 ------------
 
@@ -52,7 +61,7 @@ Lib Usage
     assert isinstance(archive, destream.Archive)
 
     # ==> we can read the content but not seek
-    print archive.read()
+    print(archive.read())
     ```
 3.  Open an archive that holds only one file,
     ```python
@@ -60,7 +69,7 @@ Lib Usage
 
     # ==> we can read the archive like it is a stream
     if archive.single():
-        print archive.read()
+        print(archive.read())
     else:
         archive.extractall('/tmp/some/path/')
     ```
