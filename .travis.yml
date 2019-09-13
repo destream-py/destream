@@ -8,8 +8,8 @@ python:
 
 os:
   - linux
-  - osx
-  - windows
+  # - osx         # NOTE: Python is not available yet (not tested)
+  # - windows     # NOTE: Python is not available yet
 
 cache: pip
 
