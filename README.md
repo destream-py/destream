@@ -9,7 +9,7 @@ _destream: decompress a stream_
 Compatibility
 -------------
 
- *  Python: 2.7, 3.4, 3.5, 3.6, 3.7
+ *  Python: 2.7, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9
  *  OS:
      -  Linux
      -  OSX is not tested
