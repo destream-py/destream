@@ -1,5 +1,4 @@
-[![Tests](https://github.com/destream-py/destream/workflows/CI/badge.svg)](https://github.com/destream-py/destream/actions?query=workflow%3ACI)
-[![Build Status](https://travis-ci.org/cecton/destream.svg?branch=main)](https://travis-ci.org/cecton/destream)
+![Test destream](https://github.com/destream-py/destream/workflows/Test%20destream/badge.svg)
 [![codecov](https://codecov.io/gh/cecton/destream/branch/main/graph/badge.svg)](https://codecov.io/gh/cecton/destream)
 
 destream
@@ -10,7 +9,7 @@ _destream: decompress a stream_
 Compatibility
 -------------
 
- *  Python: 2.7, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9
+ *  Python: 3.6, 3.7, 3.8, 3.9
  *  OS:
      -  Linux
      -  OSX is not tested
