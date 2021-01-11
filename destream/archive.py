@@ -8,7 +8,7 @@ __all__ = """
           """.split()
 
 
-RE_EXTENSION = re.compile('^(.*?)(\.([^.]+))?$')
+RE_EXTENSION = re.compile(r'^(.*?)(\.([^.]+))?$')
 
 
 class Archive(io.BufferedReader):
@@ -67,7 +67,7 @@ class Archive(io.BufferedReader):
 
     def close(self):
         if getattr(self, 'closefd', True):
-            super(Archive, self).close()
+            super().close()
 
 
 class ArchivePack(Archive):

@@ -72,7 +72,7 @@ def make_seekable(fileobj):
 
 class _ExternalPipeWriter(Thread):
     def __init__(self, r, w):
-        super(_ExternalPipeWriter, self).__init__()
+        super().__init__()
         self.daemon = True
         self.r = r
         self.w = w
@@ -80,7 +80,7 @@ class _ExternalPipeWriter(Thread):
     def run(self):
         try:
             copyfileobj(self.r, self.w)
-        except IOError as exc:
+        except OSError as exc:
             # NOTE: regular exception when we close the pipe, just hide it
             if exc.errno == errno.EPIPE:
                 pass
@@ -101,7 +101,7 @@ class ExternalPipe(Archive):
             "_command attribute is missing in class %s" % type(self)
         self.p = Popen(self._command, stdout=PIPE, stdin=PIPE, stderr=PIPE)
         self.t = _ExternalPipeWriter(stdin, self.p.stdin)
-        super(ExternalPipe, self).__init__(name, fileobj=self.p.stdout,
+        super().__init__(name, fileobj=self.p.stdout,
                                            source=stdin)
         self.t.start()
 
@@ -128,7 +128,7 @@ class ExternalPipe(Archive):
         return self.p.stdout.closed
 
     def close(self):
-        super(ExternalPipe, self).close()
+        super().close()
         try:
             self.p.terminate()
         except OSError as exc:

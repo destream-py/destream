@@ -23,7 +23,7 @@ def parse_hunk(hunk):
     return info
 
 
-class Header(object):
+class Header:
     def __init__(self, hunk):
         info = parse_hunk(hunk)
         info['physical_size'] = int(info['physical_size'])
@@ -32,7 +32,7 @@ class Header(object):
         self.__dict__.update(info)
 
 
-class Member(object):
+class Member:
     def __init__(self, hunk):
         info = parse_hunk(hunk)
         info['filename'] = info['path']

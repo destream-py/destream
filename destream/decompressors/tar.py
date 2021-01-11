@@ -67,13 +67,10 @@ class Untar(ArchivePack):
         self.tarfile = tarlib.TarFile.open(fileobj=source)
         first_member = self.tarfile.next()
         if first_member is None:
-            raise IOError("can not read first member of the tar archive")
+            raise OSError("can not read first member of the tar archive")
         self._single = (self.tarfile.next() is None)
         if self._single:
-            if sys.version_info < (3, 0):
-                stream = FileMember(self.tarfile, first_member)
-            else:
-                stream = tarlib.ExFileObject(self.tarfile, first_member)
+            stream = tarlib.ExFileObject(self.tarfile, first_member)
             stream_name = first_member.name
             self._compression += ':' + stream_name
         else:
@@ -92,10 +89,7 @@ class Untar(ArchivePack):
         return members
 
     def open(self, member):
-        if sys.version_info < (3, 0):
-            return FileMember(self.tarfile, member)
-        else:
-            return tarlib.ExFileObject(self.tarfile, member)
+        return tarlib.ExFileObject(self.tarfile, member)
 
     def extract(self, member, path):
         return self.tarfile.extract(member, path)
@@ -104,10 +98,10 @@ class Untar(ArchivePack):
         return self.tarfile.extractall(path, members)
 
     def close(self):
-        return super(Untar, self).close() if self.single() \
+        return super().close() if self.single() \
             else self.tarfile.close()
 
     @property
     def closed(self):
-        return super(Untar, self).closed if self.single() \
+        return super().closed if self.single() \
             else self.tarfile.closed

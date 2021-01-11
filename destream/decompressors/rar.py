@@ -1,5 +1,3 @@
-from __future__ import division
-
 import struct
 import binascii
 import re
@@ -25,14 +23,14 @@ def iter_on_hunks(hunks):
         yield info
 
 
-class Header(object):
+class Header:
     def __init__(self, info):
         self.__dict__.update(info)
         assert 'RAR' in self.details, \
             "Maybe not a RAR file:%s\n" % self.details
 
 
-class Member(object):
+class Member:
     def __init__(self, info):
         info['filename'] = info.pop('name')
         info['size'] = int(info.get('size', 0))
@@ -64,7 +62,7 @@ class Unrar(ArchivePack):
     def _check_availability(cls):
         ExternalPipe._check_availability.__func__(cls)
         output = check_output(cls._command).decode()
-        matches = re.search("(?:UN)?RAR (\d+\.\d+)", output)
+        matches = re.search(r"(?:UN)?RAR (\d+\.\d+)", output)
         assert matches, "%s: can not determine version" \
                         % cls._command[0]
         cls.version = tuple(Version(matches.group(1)).version)
