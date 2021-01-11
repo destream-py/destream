@@ -101,8 +101,9 @@ class GuesserTest(unittest.TestCase):
                             getattr(member, 'name', None))
                         if filename is None:
                             raise AttributeError(
-                                "%s instance has no attribute 'filename' nor "
-                                "'name'" % (type(member).__name__))
+                                f"{type(member).__name__} instance has no "
+                                f"attribute 'filename' nor 'name'"
+                            )
                         filepath = os.path.join(tempdir, filename)
                         self.assertTrue(os.path.isfile(filepath),
                             "can not extract using extract() method: "
@@ -118,8 +119,9 @@ class GuesserTest(unittest.TestCase):
                             getattr(member, 'name', None))
                         if filename is None:
                             raise AttributeError(
-                                "%s instance has no attribute 'filename' nor "
-                                "'name'" % (type(member).__name__))
+                                f"{type(member).__name__} instance has no "
+                                f"attribute 'filename' nor 'name'"
+                            )
                         filepath = os.path.join(tempdir, filename)
                         self.assertTrue(os.path.exists(filepath),
                             "can not extract using extract() method: "
