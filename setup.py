@@ -20,6 +20,8 @@ setup(
         "Development Status :: 5 - Production/Stable",
         "Topic :: System :: Archiving :: Compression",
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+        "Operating System :: MacOS",
+        "Operating System :: POSIX :: Linux",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
