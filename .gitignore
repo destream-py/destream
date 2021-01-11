@@ -1,5 +1,6 @@
 *.py[cod]
 .*
+!/.github
 /StreamDecompressor/__main__.py
 
 # C extensions
