@@ -63,9 +63,10 @@ def make_seekable(fileobj):
         filename = fileobj.name
         fileobj = io.FileIO(fileobj.fileno(), closefd=False)
         fileobj.name = filename
-    assert isinstance(fileobj, io.IOBase), \
-        "fileobj must be an instance of io.IOBase or a file, got %s" \
-        % type(fileobj)
+    assert isinstance(fileobj, io.IOBase), (
+        f"fileobj must be an instance of io.IOBase or a file, "
+        f"got {type(fileobj)}"
+    )
     return fileobj if fileobj.seekable() \
         else ArchiveTemp(fileobj)
 
@@ -97,8 +98,9 @@ class ExternalPipe(Archive):
     def __init__(self, name, stdin):
         assert type(self) is not ExternalPipe, \
             "This class can not be used in standalone"
-        assert hasattr(self, '_command'), \
-            "_command attribute is missing in class %s" % type(self)
+        assert hasattr(self, '_command'), (
+                f"_command attribute is missing in class {type(self)}"
+        )
         self.p = Popen(self._command, stdout=PIPE, stdin=PIPE, stderr=PIPE)
         self.t = _ExternalPipeWriter(stdin, self.p.stdin)
         super().__init__(name, fileobj=self.p.stdout,
@@ -109,8 +111,9 @@ class ExternalPipe(Archive):
     def _check_availability(cls):
         assert cls is not ExternalPipe, \
             "This class can not be used in standalone"
-        assert hasattr(cls, '_command'), \
-            "_command attribute is missing in class %s" % cls
+        assert hasattr(cls, '_command'), (
+            f"_command attribute is missing in class {cls}"
+        )
         commands = [cls._command[0]]
         if hasattr(cls, '__fallbackcommands__'):
             commands += cls.__fallbackcommands__

@@ -27,9 +27,10 @@ class Archive(io.BufferedReader):
         elif isinstance(fileobj, int):
             fileobj = io.FileIO(fileobj, closefd=False)
             fileobj.name = name
-        assert isinstance(fileobj, io.IOBase), \
-            "fileobj must be an instance of io.IOBase or a file, got %s" \
-            % type(fileobj)
+        assert isinstance(fileobj, io.IOBase), (
+            f"fileobj must be an instance of io.IOBase or a file, "
+            f"got {type(fileobj)}"
+        )
         io.BufferedReader.__init__(self, fileobj)
         self.realname = name or ''
         self.source = source
@@ -51,7 +52,9 @@ class Archive(io.BufferedReader):
     def _guess(cls, mime, name, fileobj):
         if getattr(cls, '_unique_instance', False):
             if cls in fileobj._decompressors:
-                raise ValueError("class %s already in the decompressor list")
+                raise ValueError(
+                    f"class {cls} already in the decompressor list"
+                )
         realname = name
         if hasattr(cls, '_mimes'):
             match = RE_EXTENSION.search(name)
@@ -62,7 +65,8 @@ class Archive(io.BufferedReader):
             if mime not in cls._mimes:
                 raise ValueError(
                     (cls, mime, name, fileobj),
-                    "can not decompress fileobj using class %s" % cls.__name__)
+                    f"can not decompress fileobj using class {cls.__name__}"
+                )
         return realname
 
     def close(self):
@@ -82,16 +86,16 @@ class ArchivePack(Archive):
 
     def members(self):
         raise NotImplementedError(
-            "class %s does not implement this method" % type(self))
+            f"class {type(self)} does not implement this method")
 
     def open(self, member):
         raise NotImplementedError(
-            "class %s does not implement this method" % type(self))
+            f"class {type(self)} does not implement this method")
 
     def extract(self, member, path):
         raise NotImplementedError(
-            "class %s does not implement this method" % type(self))
+            f"class {type(self)} does not implement this method")
 
     def extractall(self, path, members=None):
         raise NotImplementedError(
-            "class %s does not implement this method" % type(self))
+            f"class {type(self)} does not implement this method")

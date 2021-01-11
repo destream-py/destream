@@ -26,8 +26,7 @@ def iter_on_hunks(hunks):
 class Header:
     def __init__(self, info):
         self.__dict__.update(info)
-        assert 'RAR' in self.details, \
-            "Maybe not a RAR file:%s\n" % self.details
+        assert 'RAR' in self.details, f"Maybe not a RAR file: {self.details}"
 
 
 class Member:
@@ -63,12 +62,12 @@ class Unrar(ArchivePack):
         ExternalPipe._check_availability.__func__(cls)
         output = check_output(cls._command).decode()
         matches = re.search(r"(?:UN)?RAR (\d+\.\d+)", output)
-        assert matches, "%s: can not determine version" \
-                        % cls._command[0]
+        assert matches, f"{cls._command[0]}: can not determine version"
         cls.version = tuple(Version(matches.group(1)).version)
         # NOTE: the parameter vta is available from version 5
-        assert cls.version >= (5, 0), "%s: incompatible version %s" \
-                                      % (cls._command[0], cls.version)
+        assert cls.version >= (5, 0), (
+            f"{cls._command[0]}: incompatible version {cls.version}"
+        )
 
     def __init__(self, name, fileobj):
         self.fileobj = ArchiveTemp(fileobj)
