@@ -7,7 +7,7 @@ __all__ = """
           """.split()
 
 
-class Guesser(object):
+class Guesser:
     """
     Make a stream using the decompressors given in the constructor
     """

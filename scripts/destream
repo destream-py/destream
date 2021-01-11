@@ -63,7 +63,7 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         sys.stderr.write("KeyboardInterrupt\n")
         sys.exit(1)
-    except IOError as exc:
+    except OSError as exc:
         if exc.errno == errno.EPIPE:
             sys.stderr.write("Broken pipe\n")
             sys.exit(1)
