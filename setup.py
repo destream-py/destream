@@ -1,3 +1,4 @@
+from pathlib import Path
 from setuptools import setup, find_packages
 
 setup(
@@ -7,9 +8,11 @@ setup(
     author_email = "cecile.tonglet@cecton.com",
     description = ("A simple module to decompress streams compressed multiple "
                    "times"),
+    long_description=Path("README.md").read_text(),
+    long_description_content_type="text/markdown",
     license = "GPLv2",
     keywords = "stream file decompress zip zstd",
-    url = "https://github.com/cecton/destream",
+    url = "https://github.com/destream-py/destream",
     packages = find_packages(),
     scripts = ['scripts/destream'],
     install_requires = ['python-magic>=0.4.12'],

@@ -1,5 +1,7 @@
 ![Test destream](https://github.com/destream-py/destream/workflows/Test%20destream/badge.svg)
 [![codecov](https://codecov.io/gh/cecton/destream/branch/main/graph/badge.svg)](https://codecov.io/gh/cecton/destream)
+[![PyPI](https://img.shields.io/pypi/v/destream)](https://pypi.org/project/destream/)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/destream)
 
 destream
 ========
