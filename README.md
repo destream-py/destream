@@ -50,8 +50,8 @@ Lib Usage
     ```python
     archive = destream.open("some_file.tar.gz")
 
-    assert isinstance(archive, destream.ArchivePack) \
-        and isinstance(archive.tarfile, tarfile.TarFile)
+    assert (isinstance(archive, destream.ArchivePack) and
+           isinstance(archive.tarfile, tarfile.TarFile))
 
     # ==> we can extract members using extract() and extractall()
     archive.extractall("/tmp")

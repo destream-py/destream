@@ -7,18 +7,18 @@ from distutils.version import LooseVersion as Version
 
 from destream import ArchivePack, ArchiveTemp, ExternalPipe
 
-__all__ = ['Unrar']
+__all__ = ["Unrar"]
 
 
 def iter_on_hunks(hunks):
     for hunk in hunks:
         info = {}
         for m in re.finditer(
-                r'^[ \t\f]*(.+?)[ \t\f]*:[ \t\f]*(.*?)[ \t\f]*$',
-                hunk, flags=re.M):
-            key = re.sub(r'\W', '_', m.group(1).lower())
+            r"^[ \t\f]*(.+?)[ \t\f]*:[ \t\f]*(.*?)[ \t\f]*$", hunk, flags=re.M
+        ):
+            key = re.sub(r"\W", "_", m.group(1).lower())
             info[key] = m.group(2)
-        if info.get('service', '') == 'EOF':
+        if info.get("service", "") == "EOF":
             break
         yield info
 
@@ -26,36 +26,40 @@ def iter_on_hunks(hunks):
 class Header:
     def __init__(self, info):
         self.__dict__.update(info)
-        assert 'RAR' in self.details, f"Maybe not a RAR file: {self.details}"
+        assert "RAR" in self.details, f"Maybe not a RAR file: {self.details}"
 
 
 class Member:
     def __init__(self, info):
-        info['filename'] = info.pop('name')
-        info['size'] = int(info.get('size', 0))
-        info['packed_size'] = int(info.get('packed_size', 0))
-        info['ratio'] = float(info.get('ratio', '0%')[:-1]) / 100
-        info['crc32'] = reduce(lambda x, y: x * 256 + y, \
-            struct.unpack('BBBB', binascii.unhexlify(info['crc32'])), 0)
+        info["filename"] = info.pop("name")
+        info["size"] = int(info.get("size", 0))
+        info["packed_size"] = int(info.get("packed_size", 0))
+        info["ratio"] = float(info.get("ratio", "0%")[:-1]) / 100
+        info["crc32"] = reduce(
+            lambda x, y: x * 256 + y,
+            struct.unpack("BBBB", binascii.unhexlify(info["crc32"])),
+            0,
+        )
         self.__dict__.update(info)
 
     def isfile(self):
-        return self.type == 'File'
+        return self.type == "File"
 
     def isdir(self):
-        return self.type == 'Directory'
+        return self.type == "Directory"
+
 
 class Unrar(ArchivePack):
-    _mimes = ['application/x-rar']
-    _extensions = ['rar']
-    _command = ['rar']
-    _compression = 'rar'
+    _mimes = ["application/x-rar"]
+    _extensions = ["rar"]
+    _command = ["rar"]
+    _compression = "rar"
     # NOTE:
     #   https://en.wikipedia.org/wiki/Unrar
     #   Unrar is the name of two different programs, we should prefer rar by
     #   default to make sure to use the most recent and compatible version if
     #   available.
-    __fallbackcommands__ = ['unrar']
+    __fallbackcommands__ = ["unrar"]
 
     @classmethod
     def _check_availability(cls):
@@ -65,23 +69,25 @@ class Unrar(ArchivePack):
         assert matches, f"{cls._command[0]}: can not determine version"
         cls.version = tuple(Version(matches.group(1)).version)
         # NOTE: the parameter vta is available from version 5
-        assert cls.version >= (5, 0), (
-            f"{cls._command[0]}: incompatible version {cls.version}"
-        )
+        assert cls.version >= (
+            5,
+            0,
+        ), f"{cls._command[0]}: incompatible version {cls.version}"
 
     def __init__(self, name, fileobj):
         self.fileobj = ArchiveTemp(fileobj)
-        output = check_output(self._command +
-                              ['vta', self.fileobj.name]).decode()
+        output = check_output(
+            self._command + ["vta", self.fileobj.name]
+        ).decode()
         hunks = iter_on_hunks(output.split("\n\n"))
         self.information = next(hunks)
         self.header = Header(next(hunks))
         self._members = [m for m in (Member(h) for h in hunks)]
-        self._stream = (len(self._members) == 1)
+        self._stream = len(self._members) == 1
         if self._stream:
             stream = self.open(self._members[0])
             stream_name = self._members[0].filename
-            self._compression += ':' + stream_name
+            self._compression += ":" + stream_name
         else:
             stream_name = name
             stream = self.fileobj
@@ -92,10 +98,17 @@ class Unrar(ArchivePack):
         return self._members
 
     def open(self, member):
-        p = Popen(self._command +
-            ['p', '-ierr', self.fileobj.name,
-             (member.filename if isinstance(member, Member) else member)],
-            stdout=PIPE, stderr=PIPE)
+        p = Popen(
+            self._command
+            + [
+                "p",
+                "-ierr",
+                self.fileobj.name,
+                (member.filename if isinstance(member, Member) else member),
+            ],
+            stdout=PIPE,
+            stderr=PIPE,
+        )
         if self._stream:
             self._p = p
             return p.stdout
@@ -105,7 +118,8 @@ class Unrar(ArchivePack):
                 retcode = p.wait()
                 if retcode:
                     raise CalledProcessError(
-                        retcode, self._command, output=p.stderr.read())
+                        retcode, self._command, output=p.stderr.read()
+                    )
             finally:
                 p.stdout.close()
                 p.stderr.close()
@@ -128,27 +142,38 @@ class Unrar(ArchivePack):
             self.fileobj.close()
 
     def extract(self, member, path):
-        p = Popen(self._command +
-            ['x', self.fileobj.name,
-             (member.filename if isinstance(member, Member) else member),
-             path], stdout=PIPE)
+        p = Popen(
+            self._command
+            + [
+                "x",
+                self.fileobj.name,
+                (member.filename if isinstance(member, Member) else member),
+                path,
+            ],
+            stdout=PIPE,
+        )
         try:
             retcode = p.wait()
             if retcode:
                 raise CalledProcessError(
-                    retcode, self._command, output=p.stdout.read())
+                    retcode, self._command, output=p.stdout.read()
+                )
         finally:
             p.stdout.close()
 
     def extractall(self, path, members=[]):
-        p = Popen(self._command +
-            ['x', self.fileobj.name] +
-            [(m.filename if isinstance(m, Member) else m) for m in members] +
-            [path], stdout=PIPE)
+        p = Popen(
+            self._command
+            + ["x", self.fileobj.name]
+            + [(m.filename if isinstance(m, Member) else m) for m in members]
+            + [path],
+            stdout=PIPE,
+        )
         try:
             retcode = p.wait()
             if retcode:
                 raise CalledProcessError(
-                    retcode, self._command, output=p.stdout.read())
+                    retcode, self._command, output=p.stdout.read()
+                )
         finally:
             p.stdout.close()

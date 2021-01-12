@@ -1,16 +1,16 @@
 from destream import ExternalPipe
 
-__all__ = ['Bunzip2']
+__all__ = ["Bunzip2"]
 
 
 class Bunzip2(ExternalPipe):
-    _mimes = ['application/x-bzip2']
-    _extensions = ['bz2', 'bz', 'tbz2', 'tbz']
-    _command = ['bunzip2']
-    _compression = 'bzip2'
+    _mimes = ["application/x-bzip2"]
+    _extensions = ["bz2", "bz", "tbz2", "tbz"]
+    _command = ["bunzip2"]
+    _compression = "bzip2"
 
     @classmethod
     def _guess(cls, mime, name, fileobj):
-        is_tar = name.endswith('.tbz2') or name.endswith('.tbz')
+        is_tar = name.endswith(".tbz2") or name.endswith(".tbz")
         realname = super()._guess(mime, name, fileobj)
-        return realname + '.tar' if is_tar else realname
+        return realname + ".tar" if is_tar else realname
