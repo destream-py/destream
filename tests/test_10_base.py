@@ -34,7 +34,7 @@ class Archive(unittest.TestCase):
             self.assertEqual(
                 "xxx", BaseNameTest._guess("xxx", "xxx.ext1", fileobj)
             )
-        except ValueError as e:
+        except ValueError:
             pass
         else:
             self.fail("guessing should has failed")

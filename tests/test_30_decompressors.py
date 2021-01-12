@@ -99,9 +99,9 @@ class GuesserTest(unittest.TestCase):
 
                 # test source archive
                 archive.seek(0)
-                archive_content = archive.read()
+                archive.read()
                 archive.source.seek(0)
-                source_content = archive.source.read()
+                archive.source.read()
                 self.assertEqual(
                     archive.read(),
                     archive.source.read(),
@@ -163,7 +163,7 @@ class GuesserTest(unittest.TestCase):
                 finally:
                     shutil.rmtree(tempdir)
         # force closing archive by deleting the instance
-        archive = None
+        del archive
         self.assertFalse(compressed_fileobj.closed)
         self.assertFalse(decompressed_fileobj.closed)
 
@@ -439,6 +439,6 @@ class GuesserTest(unittest.TestCase):
             archive2 = destream.open(fh.name)
             proc2 = archive2.p
             thread2 = archive2.t
-            archive2 = None
+            del archive2
             self.assertIsNotNone(proc2.poll())
             self.assertFalse(thread2.is_alive())
