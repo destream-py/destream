@@ -161,7 +161,9 @@ class Unrar(ArchivePack):
         finally:
             p.stdout.close()
 
-    def extractall(self, path, members=[]):
+    def extractall(self, path, members=None):
+        if members is None:
+            members = []
         p = Popen(
             self._command
             + ["x", self.fileobj.name]

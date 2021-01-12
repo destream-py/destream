@@ -15,10 +15,12 @@ class Guesser:
     def __init__(
         self,
         decompressors=builtin_decompressors,
-        extra_decompressors=[],
+        extra_decompressors=None,
         limit=10,
     ):
-        self.decompressors = decompressors + extra_decompressors
+        self.decompressors = decompressors
+        if extra_decompressors:
+            self.decompressors += extra_decompressors
         self.limit = limit
 
     def guess(self, archive):
