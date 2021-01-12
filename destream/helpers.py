@@ -20,12 +20,13 @@ class ArchiveFile(Archive):
     """
     Make an archive from a file-object
     """
+
     def __init__(self, fileobj=None, name=None, closefd=True):
         if not fileobj:
             if not name:
                 raise TypeError("Either name, fileobj must be specified")
             fileobj = io.FileIO(name)
-        elif not name and hasattr(fileobj, 'name'):
+        elif not name and hasattr(fileobj, "name"):
             name = fileobj.name
         Archive.__init__(self, name, fileobj, source=fileobj, closefd=closefd)
 
@@ -34,13 +35,14 @@ class ArchiveTemp(Archive):
     """
     Write down a file-object to a temporary file and make an archive from it
     """
+
     def __init__(self, fileobj, name=None):
         if isinstance(fileobj, Archive):
-            if name is None: name = fileobj.realname
+            if name is None:
+                name = fileobj.realname
         else:
             name = fileobj.name
-        tempdir = \
-            (os.path.dirname(name) if isinstance(name, str) else None)
+        tempdir = os.path.dirname(name) if isinstance(name, str) else None
         try:
             self.tempfile = tempfile.NamedTemporaryFile(dir=tempdir)
         except OSError:
@@ -67,8 +69,7 @@ def make_seekable(fileobj):
         f"fileobj must be an instance of io.IOBase or a file, "
         f"got {type(fileobj)}"
     )
-    return fileobj if fileobj.seekable() \
-        else ArchiveTemp(fileobj)
+    return fileobj if fileobj.seekable() else ArchiveTemp(fileobj)
 
 
 class _ExternalPipeWriter(Thread):
@@ -95,35 +96,40 @@ class ExternalPipe(Archive):
     """
     Pipe a file-object to a command and make an archive of the output
     """
+
     def __init__(self, name, stdin):
-        assert type(self) is not ExternalPipe, \
-            "This class can not be used in standalone"
-        assert hasattr(self, '_command'), (
-                f"_command attribute is missing in class {type(self)}"
-        )
+        assert (
+            type(self) is not ExternalPipe
+        ), "This class can not be used in standalone"
+        assert hasattr(
+            self, "_command"
+        ), f"_command attribute is missing in class {type(self)}"
         self.p = Popen(self._command, stdout=PIPE, stdin=PIPE, stderr=PIPE)
         self.t = _ExternalPipeWriter(stdin, self.p.stdin)
-        super().__init__(name, fileobj=self.p.stdout,
-                                           source=stdin)
+        super().__init__(name, fileobj=self.p.stdout, source=stdin)
         self.t.start()
 
     @classmethod
     def _check_availability(cls):
-        assert cls is not ExternalPipe, \
-            "This class can not be used in standalone"
-        assert hasattr(cls, '_command'), (
-            f"_command attribute is missing in class {cls}"
-        )
+        assert (
+            cls is not ExternalPipe
+        ), "This class can not be used in standalone"
+        assert hasattr(
+            cls, "_command"
+        ), f"_command attribute is missing in class {cls}"
         commands = [cls._command[0]]
-        if hasattr(cls, '__fallbackcommands__'):
+        if hasattr(cls, "__fallbackcommands__"):
             commands += cls.__fallbackcommands__
         existing_commands = [x for x in map(find_executable, commands) if x]
         if not existing_commands:
             if len(commands) == 1:
                 raise OSError(2, commands[0], "cannot find executable")
             else:
-                raise OSError(2, commands[0],
-                    "cannot find executable between: " + ", ".join(commands))
+                raise OSError(
+                    2,
+                    commands[0],
+                    "cannot find executable between: " + ", ".join(commands),
+                )
         cls._command[0] = existing_commands[0]
 
     @property

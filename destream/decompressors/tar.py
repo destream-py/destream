@@ -5,7 +5,7 @@ from os import SEEK_SET
 
 from destream import ArchivePack, make_seekable
 
-__all__ = ['Untar']
+__all__ = ["Untar"]
 
 
 class FileMember(io.IOBase, tarlib.ExFileObject):
@@ -50,17 +50,18 @@ class FileMember(io.IOBase, tarlib.ExFileObject):
         return buf
 
     def readinto(self, b):
-        if len(b) == 0: return None
+        if len(b) == 0:
+            return None
         buf = self.read(len(b))
-        b[:len(buf)] = buf
+        b[: len(buf)] = buf
         return len(buf)
 
 
 class Untar(ArchivePack):
-    _mimes = ['application/x-tar']
-    _extensions = ['tar']
-    __compression = 'tar'
-    _compression = 'tar'
+    _mimes = ["application/x-tar"]
+    _extensions = ["tar"]
+    __compression = "tar"
+    _compression = "tar"
 
     def __init__(self, name, fileobj):
         source = make_seekable(fileobj)
@@ -68,11 +69,11 @@ class Untar(ArchivePack):
         first_member = self.tarfile.next()
         if first_member is None:
             raise OSError("can not read first member of the tar archive")
-        self._single = (self.tarfile.next() is None)
+        self._single = self.tarfile.next() is None
         if self._single:
             stream = tarlib.ExFileObject(self.tarfile, first_member)
             stream_name = first_member.name
-            self._compression += ':' + stream_name
+            self._compression += ":" + stream_name
         else:
             stream_name = name
             stream = source
@@ -98,10 +99,8 @@ class Untar(ArchivePack):
         return self.tarfile.extractall(path, members)
 
     def close(self):
-        return super().close() if self.single() \
-            else self.tarfile.close()
+        return super().close() if self.single() else self.tarfile.close()
 
     @property
     def closed(self):
-        return super().closed if self.single() \
-            else self.tarfile.closed
+        return super().closed if self.single() else self.tarfile.closed

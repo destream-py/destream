@@ -15,7 +15,8 @@ from destream.decompressors.rar import *
 
 builtin_decompressors = [
     (0, symbol)
-    for name, symbol
-    in inspect.getmembers(sys.modules[__name__], inspect.isclass)
+    for name, symbol in inspect.getmembers(
+        sys.modules[__name__], inspect.isclass
+    )
     if issubclass(symbol, archive.Archive)
 ]

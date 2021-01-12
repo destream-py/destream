@@ -4,13 +4,13 @@ import sys
 
 from destream import ArchivePack, make_seekable, ArchiveFile
 
-__all__ = ['Unzip']
+__all__ = ["Unzip"]
 
 
 class Unzip(ArchivePack):
-    _mimes = ['application/zip']
-    _extensions = ['zip']
-    _compression = 'zip'
+    _mimes = ["application/zip"]
+    _extensions = ["zip"]
+    _compression = "zip"
 
     def __init__(self, name, fileobj):
         # part of the Zip header is at the end of the file. Therefore, we have
@@ -19,9 +19,13 @@ class Unzip(ArchivePack):
         fileobj = make_seekable(fileobj)
         self.zipfile = zipfile.ZipFile(fileobj)
         if self.single():
-            self._compression += ':' + self.members()[0].filename
-        ArchivePack.__init__(self, name, source=fileobj,
-            fileobj=(self.single() and self.open(self.members()[0])))
+            self._compression += ":" + self.members()[0].filename
+        ArchivePack.__init__(
+            self,
+            name,
+            source=fileobj,
+            fileobj=(self.single() and self.open(self.members()[0])),
+        )
 
     def members(self):
         return self.zipfile.infolist()

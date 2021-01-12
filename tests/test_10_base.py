@@ -1,6 +1,7 @@
 import os
 from tempfile import TemporaryFile
 from io import BytesIO
+
 try:
     import unittest2 as unittest
 except ImportError:
@@ -10,25 +11,29 @@ from destream import Archive, ArchiveFile, ArchiveTemp, ExternalPipe
 
 
 class BaseNameTest(Archive):
-    _extensions = ['ext1', 'ext2']
-    _mimes = ['mime1', 'mime2']
+    _extensions = ["ext1", "ext2"]
+    _mimes = ["mime1", "mime2"]
 
 
 class Archive(unittest.TestCase):
     def test_10_guess_basename(self):
-        fileobj = BytesIO(b'')
+        fileobj = BytesIO(b"")
         try:
             self.assertEqual(
-                'xxx', BaseNameTest._guess('mime2', 'xxx', fileobj))
+                "xxx", BaseNameTest._guess("mime2", "xxx", fileobj)
+            )
             self.assertEqual(
-                'xxx', BaseNameTest._guess('mime1', 'xxx.ext2', fileobj))
+                "xxx", BaseNameTest._guess("mime1", "xxx.ext2", fileobj)
+            )
             self.assertEqual(
-                'xxx', BaseNameTest._guess('mime2', 'xxx.ext1', fileobj))
+                "xxx", BaseNameTest._guess("mime2", "xxx.ext1", fileobj)
+            )
         except ValueError as e:
             self.fail(repr(e))
         try:
             self.assertEqual(
-                'xxx', BaseNameTest._guess('xxx', 'xxx.ext1', fileobj))
+                "xxx", BaseNameTest._guess("xxx", "xxx.ext1", fileobj)
+            )
         except ValueError as e:
             pass
         else:
@@ -38,14 +43,13 @@ class Archive(unittest.TestCase):
 class ArchiveFileTest(unittest.TestCase):
     def _regular_tests(self, archive, fileobj, filename, text):
         self.assertEqual(
-            archive.fileno(),
-            fileobj.fileno(),
-            "file no does not match!")
-        self.assertEqual(archive.name, filename,
-            "name attribute does not match!")
+            archive.fileno(), fileobj.fileno(), "file no does not match!"
+        )
+        self.assertEqual(
+            archive.name, filename, "name attribute does not match!"
+        )
         archive.seek(0)
-        self.assertEqual(archive.read(), text,
-            "file content does not match!")
+        self.assertEqual(archive.read(), text, "file content does not match!")
 
     def test_10_passing_file_object(self):
         text = b"Hello World!\n"
@@ -74,30 +78,31 @@ class ArchiveFileTest(unittest.TestCase):
 
 
 class CatsEye(ExternalPipe):
-    _command = ['cat']
-    _compression = 'cat'
+    _command = ["cat"]
+    _compression = "cat"
     _unique_instance = True
 
 
 class ExternalPipeTest(unittest.TestCase):
     def _regular_tests(self, pipe, filename, text):
-        self.assertEqual(pipe.realname, filename,
-            "name attribute does not match!")
+        self.assertEqual(
+            pipe.realname, filename, "name attribute does not match!"
+        )
         self.assertEqual(pipe.read(), text, "file content does not match!")
-        self.assertEqual(pipe.read(), b'', "should be the end of file")
+        self.assertEqual(pipe.read(), b"", "should be the end of file")
 
     def test_10_check_output(self):
         text = b"Hello World\n"
-        filename = '<pipe_test>'
+        filename = "<pipe_test>"
         fileobj = BytesIO(text)
         with CatsEye(filename, fileobj) as pipe:
             try:
-                CatsEye._guess('', filename, pipe)
+                CatsEye._guess("", filename, pipe)
             except ValueError:
                 pass
             else:
                 self.fail("CatsEye is _unique_instance = True")
-            self.assertEqual(pipe.compressions, ['cat'])
+            self.assertEqual(pipe.compressions, ["cat"])
             self.assertEqual(pipe._decompressors, [CatsEye])
             self._regular_tests(pipe, filename, text)
 
@@ -109,9 +114,10 @@ class ArchiveTempTest(unittest.TestCase):
         fileobj = BytesIO(text)
         with CatsEye(filename, fileobj) as pipe:
             temp = ArchiveTemp(pipe)
-            self.assertEqual(pipe.read(), b'', "should be the end of file")
+            self.assertEqual(pipe.read(), b"", "should be the end of file")
             self.assertEqual(
                 os.path.dirname(os.path.abspath(filename)),
                 os.path.dirname(os.path.abspath(temp.name)),
-                "Temp file and temp archive should be in the same directory")
+                "Temp file and temp archive should be in the same directory",
+            )
             self.assertEqual(temp.read(), text)
