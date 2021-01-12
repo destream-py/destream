@@ -1,6 +1,5 @@
 import tarfile as tarlib
 import io
-import sys
 from os import SEEK_SET
 
 from destream import ArchivePack, make_seekable

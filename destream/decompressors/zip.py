@@ -1,8 +1,6 @@
 import zipfile
-import io
-import sys
 
-from destream import ArchivePack, make_seekable, ArchiveFile
+from destream import ArchivePack, make_seekable
 
 __all__ = ["Unzip"]
 

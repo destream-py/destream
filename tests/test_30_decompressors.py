@@ -2,7 +2,6 @@ import gzip
 import os
 import tempfile
 import shutil
-import sys
 from io import BytesIO
 import tarfile
 import zipfile
