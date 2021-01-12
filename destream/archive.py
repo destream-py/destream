@@ -47,7 +47,7 @@ class Archive(io.BufferedReader):
             self.compressions += [self._compression]
 
     @classmethod
-    def _check_availability(self):
+    def _check_availability(cls):
         pass
 
     @classmethod
