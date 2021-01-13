@@ -331,6 +331,10 @@ class GuesserTest(unittest.TestCase):
         )
 
     def test_30_zip_single_file(self):
+        if magic.version() >= 539:
+            self.skipTest(
+                "libmagic 5.39+ does not identify ZIP files correctly"
+            )
         uncompressed = BytesIO(b"Hello World\n")
         uncompressed.name = "test_file"
         raw = BytesIO()
