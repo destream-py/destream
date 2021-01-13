@@ -108,3 +108,13 @@ Troubleshooting
 
     Check your version of file and libmagic. It's working on version 5.32 and
     greater but not on version 5.25 and lower.
+    
+*   ZIP files fails to extract
+    
+    If you have `libmagic` version 5.39 (released 2020-06-16), 
+    this version does not identify ZIP file v2.0 correctly.
+    This [bug][1] in `libmagic` has been reported.
+    Install the previous version 5.38 if you can.
+
+
+[1]: https://bugs.astron.com/view.php?id=228
