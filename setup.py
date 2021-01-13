@@ -4,8 +4,6 @@ from setuptools import setup, find_packages
 setup(
     name = "destream",
     version = "5.0.1",
-    author = "Cecile Tonglet",
-    author_email = "cecile.tonglet@cecton.com",
     description = ("A simple module to decompress streams compressed multiple "
                    "times"),
     long_description=Path("README.md").read_text(),
