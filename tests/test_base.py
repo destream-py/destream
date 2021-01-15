@@ -52,7 +52,7 @@ def test_archivefile_closefd():
     archive.close()
     assert fileobj.closed
 
-
+# This is a simple decompressor that does absolutely nothing. Great for testing.
 class CatsEye(ExternalPipe):
     _command = ["cat"]
     _compression = "cat"
