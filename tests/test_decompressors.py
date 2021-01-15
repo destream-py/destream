@@ -11,7 +11,7 @@ import pytest
 import destream
 
 
-def _check_decompressor(
+def check_decompressor(
     tempdir,
     decompressor,
     compressed_fileobj,
@@ -111,7 +111,7 @@ def _check_decompressor(
     assert not decompressed_fileobj.closed
 
 
-def test_10_plain_text():
+def test_guess_plain_text():
     fileobj = BytesIO(b"Hello World\n")
     fileobj.name = "test_file.txt"
     guessed = destream.open(fileobj=fileobj)
@@ -121,7 +121,7 @@ def test_10_plain_text():
     assert guessed.realname == fileobj.name
 
 
-def test_20_external_pipe_lzma(tmp_path):
+def test_guess_external_pipe_lzma(tmp_path):
     uncompressed = BytesIO(b"Hello World\n")
     uncompressed.name = "test_file"
     raw = BytesIO(
@@ -130,12 +130,12 @@ def test_20_external_pipe_lzma(tmp_path):
         b"\xff\xff\x0b8\x00\x00"
     )
     raw.name = "test_file.lzma"
-    _check_decompressor(
+    check_decompressor(
         tmp_path, destream.decompressors.Unlzma, raw, uncompressed
     )
 
 
-def test_20_external_pipe_gzip(tmp_path):
+def test_guess_external_pipe_gzip(tmp_path):
     uncompressed = BytesIO(b"Hello World\n")
     uncompressed.name = "test_file"
     raw = BytesIO(
@@ -156,7 +156,7 @@ def test_20_external_pipe_gzip(tmp_path):
         uncompressed.seek(0)
         raw.seek(0)
         raw.name = f"test_file{ext}"
-        _check_decompressor(
+        check_decompressor(
             tmp_path,
             destream.decompressors.Gunzip,
             raw,
@@ -165,7 +165,7 @@ def test_20_external_pipe_gzip(tmp_path):
         )
 
 
-def test_30_tar_single_file(tmp_path):
+def test_guess_tar_single_file(tmp_path):
     uncompressed = BytesIO(b"Hello World\n")
     uncompressed.name = "test_file"
     raw = BytesIO()
@@ -179,12 +179,12 @@ def test_30_tar_single_file(tmp_path):
     finally:
         tar.close()
     raw.seek(0)
-    _check_decompressor(
+    check_decompressor(
         tmp_path, destream.decompressors.Untar, raw, uncompressed
     )
 
 
-def test_40_tar_multiple_files(tmp_path):
+def test_guess_tar_multiple_files(tmp_path):
     uncompressed = BytesIO(b"Hello World\n")
     uncompressed.name = None
     raw = BytesIO()
@@ -199,12 +199,12 @@ def test_40_tar_multiple_files(tmp_path):
     finally:
         tar.close()
     raw.seek(0)
-    _check_decompressor(
+    check_decompressor(
         tmp_path, destream.decompressors.Untar, raw, uncompressed
     )
 
 
-def test_20_external_pipe_xz(tmp_path):
+def test_guess_external_pipe_xz(tmp_path):
     uncompressed = BytesIO(b"Hello World\n")
     uncompressed.name = "test_file"
     raw = BytesIO(
@@ -213,22 +213,22 @@ def test_20_external_pipe_xz(tmp_path):
         b"$\x0c\xa6\x18\xd8\xd8\x1f\xb6\xf3}\x01\x00\x00\x00\x00\x04YZ"
     )
     raw.name = "test_file.xz"
-    _check_decompressor(
+    check_decompressor(
         tmp_path, destream.decompressors.Unxz, raw, uncompressed
     )
 
 
-def test_20_external_pipe_zstd(tmp_path):
+def test_guess_external_pipe_zstd(tmp_path):
     uncompressed = BytesIO(b"Hello World\n")
     uncompressed.name = "test_file"
     raw = BytesIO(b"(\xb5/\xfd$\x0ca\x00\x00Hello World\n\x93C\x0f\x1a")
     raw.name = "test_file.zst"
-    _check_decompressor(
+    check_decompressor(
         tmp_path, destream.decompressors.Unzstd, raw, uncompressed
     )
 
 
-def test_30_7z_single_file(tmp_path):
+def test_guess_7z_single_file(tmp_path):
     uncompressed = BytesIO(b"Hello World\n")
     uncompressed.name = None
     # no file, only the content is packed, use 7zr -si to make it
@@ -241,7 +241,7 @@ def test_30_7z_single_file(tmp_path):
         b"\x00\x05\x01\x14\n\x01\x00\xc0\x8dZ!\xf62\xcf\x01\x15\x06"
         b"\x01\x00\x00\x00\x00\x00\x00\x00"
     )
-    _check_decompressor(
+    check_decompressor(
         tmp_path, destream.decompressors.Un7z, raw, uncompressed
     )
     uncompressed = BytesIO(b"Hello World\n")
@@ -257,12 +257,12 @@ def test_30_7z_single_file(tmp_path):
         b"\xf62\xcf\x01\x15\x06\x01\x00 \x80\xa4\x81\x00\x00"
     )
     raw.name = "test_file.7z"
-    _check_decompressor(
+    check_decompressor(
         tmp_path, destream.decompressors.Un7z, raw, uncompressed
     )
 
 
-def test_40_7z_multiple_files(tmp_path):
+def test_guess_7z_multiple_files(tmp_path):
     uncompressed = BytesIO(b"Hello World\n")
     uncompressed.name = None
     raw = BytesIO(
@@ -278,7 +278,7 @@ def test_40_7z_multiple_files(tmp_path):
         b"\n\x01pF\xbb5\x00\x00"
     )
     raw.name = "test_file.7z"
-    _check_decompressor(
+    check_decompressor(
         tmp_path, destream.decompressors.Un7z, raw, uncompressed
     )
 
@@ -287,7 +287,7 @@ def test_40_7z_multiple_files(tmp_path):
     magic.version() >= 539,
     reason="libmagic v5.39 does not identify zip files correctly",
 )
-def test_30_zip_single_file(tmp_path):
+def test_guess_zip_single_file(tmp_path):
     uncompressed = BytesIO(b"Hello World\n")
     uncompressed.name = "test_file"
     raw = BytesIO()
@@ -298,12 +298,12 @@ def test_30_zip_single_file(tmp_path):
     finally:
         zipf.close()
     raw.seek(0)
-    _check_decompressor(
+    check_decompressor(
         tmp_path, destream.decompressors.Unzip, raw, uncompressed
     )
 
 
-def test_40_zip_multiple_files(tmp_path):
+def test_guess_zip_multiple_files(tmp_path):
     uncompressed = BytesIO(b"Hello World\n")
     uncompressed.name = None
     raw = BytesIO()
@@ -315,12 +315,12 @@ def test_40_zip_multiple_files(tmp_path):
     finally:
         zipf.close()
     raw.seek(0)
-    _check_decompressor(
+    check_decompressor(
         tmp_path, destream.decompressors.Unzip, raw, uncompressed
     )
 
 
-def test_20_external_pipe_bzip2(tmp_path):
+def test_guess_external_pipe_bzip2(tmp_path):
     uncompressed = BytesIO(b"Hello World\n")
     uncompressed.name = "test_file"
     raw = BytesIO(
@@ -337,7 +337,7 @@ def test_20_external_pipe_bzip2(tmp_path):
         uncompressed.seek(0)
         raw.seek(0)
         raw.name = "test_file" + ext
-        _check_decompressor(
+        check_decompressor(
             tmp_path,
             destream.decompressors.Bunzip2,
             raw,
@@ -346,7 +346,7 @@ def test_20_external_pipe_bzip2(tmp_path):
         )
 
 
-def test_30_rar_single_file(tmp_path):
+def test_guess_rar_single_file(tmp_path):
     uncompressed = BytesIO(b"Hello World\n")
     uncompressed.name = "a"
     raw = BytesIO(
@@ -357,12 +357,12 @@ def test_30_rar_single_file(tmp_path):
         b"\x05z\x99\xd5\x10\xc4={\x00@\x07\x00"
     )
     raw.name = "test_file.rar"
-    _check_decompressor(
+    check_decompressor(
         tmp_path, destream.decompressors.Unrar, raw, uncompressed
     )
 
 
-def test_40_rar_multiple_files(tmp_path):
+def test_guess_rar_multiple_files(tmp_path):
     uncompressed = BytesIO(b"Hello World\n")
     uncompressed.name = None
     raw = BytesIO(
@@ -379,12 +379,12 @@ def test_40_rar_multiple_files(tmp_path):
         b"\x00=T\\D\x140\x01\x00\xedA\x00\x00c\x00\xc0\xc4={\x00@\x07\x00"
     )
     raw.name = "test_file.rar"
-    _check_decompressor(
+    check_decompressor(
         tmp_path, destream.decompressors.Unrar, raw, uncompressed
     )
 
 
-def test_50_object_closed_on_delete(tmp_path):
+def test_object_closed_on_delete(tmp_path):
     path = tmp_path / "testfile"
     with path.open("w+b") as fh:
         # NOTE: the file must be big enough

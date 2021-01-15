@@ -6,21 +6,21 @@ import pytest
 from destream import Archive, ArchiveFile, ArchiveTemp, ExternalPipe
 
 
-class BaseNameTest(Archive):
+class BaseNameExample(Archive):
     _extensions = ["ext1", "ext2"]
     _mimes = ["mime1", "mime2"]
 
 
-def test_10_guess_basename():
+def test_archive_guess_basename():
     fileobj = BytesIO(b"")
-    assert "xxx" == BaseNameTest._guess("mime2", "xxx", fileobj)
-    assert "xxx" == BaseNameTest._guess("mime1", "xxx.ext2", fileobj)
-    assert "xxx" == BaseNameTest._guess("mime2", "xxx.ext1", fileobj)
+    assert "xxx" == BaseNameExample._guess("mime2", "xxx", fileobj)
+    assert "xxx" == BaseNameExample._guess("mime1", "xxx.ext2", fileobj)
+    assert "xxx" == BaseNameExample._guess("mime2", "xxx.ext1", fileobj)
     with pytest.raises(ValueError):
-        assert BaseNameTest._guess("xxx", "xxx.ext1", fileobj)
+        assert BaseNameExample._guess("xxx", "xxx.ext1", fileobj)
 
 
-def test_10_passing_file_object(tmp_path):
+def test_archivefile_passing_file_object(tmp_path):
     text = b"Hello World!\n"
     path = tmp_path / "testfile"
     with path.open("w+b") as fileobj:
@@ -33,7 +33,7 @@ def test_10_passing_file_object(tmp_path):
         assert archive.read() == text
 
 
-def test_20_passing_file_name(tmp_path):
+def test_archivefile_passing_file_name(tmp_path):
     text = b"Hello World!\n"
     filename = tmp_path / "testfile"
     with filename.open("w+b") as fileobj:
@@ -43,7 +43,7 @@ def test_20_passing_file_name(tmp_path):
     assert archive.read() == text
 
 
-def test_30_closefd():
+def test_archivefile_closefd():
     fileobj = BytesIO()
     archive = ArchiveFile(fileobj=fileobj, closefd=False)
     archive.close()
@@ -59,7 +59,7 @@ class CatsEye(ExternalPipe):
     _unique_instance = True
 
 
-def test_10_check_output():
+def test_externalpipe_check_output():
     text = b"Hello World\n"
     filename = "<pipe_test>"
     fileobj = BytesIO(text)
@@ -73,7 +73,7 @@ def test_10_check_output():
         assert pipe.read() == b""
 
 
-def test_10_create_temp_archive_from_externalpipe():
+def test_create_temp_archive_from_externalpipe():
     text = b"Hello World\n"
     filename = "some_file"
     fileobj = BytesIO(text)
